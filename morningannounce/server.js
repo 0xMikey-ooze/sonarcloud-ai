@@ -26,11 +26,36 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
-app.use(express.static(__dirname));
 
-// Ensure uploads directory exists
+// Serve generated audio files with CORS headers
+app.use('/generated-pods', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}, express.static(path.join(__dirname, 'generated-pods')));
+
+// Set proper MIME types for TypeScript and JavaScript modules
+app.use(express.static(__dirname, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.tsx') || path.endsWith('.ts')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.js') || path.endsWith('.jsx')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.mjs')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  }
+}));
+
+// Ensure uploads and generated-pods directories exist
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
+}
+if (!fs.existsSync('generated-pods')) {
+  fs.mkdirSync('generated-pods');
 }
 
 // Function to send SMS via Twilio
@@ -62,40 +87,27 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
 
     const audioPath = req.file.path;
     
+    // Rename file to have proper .wav extension for OpenAI Whisper
+    const wavPath = audioPath + '.wav';
+    fs.renameSync(audioPath, wavPath);
+    
     // Process recording to create complete minipod (handled in announce.js)
-    const result = await processRecordingToMiniPod(audioPath, phoneNumber);
+    const result = await processRecordingToMiniPod(wavPath);
     
     // Clean up uploaded file
-    fs.unlinkSync(audioPath);
+    if (fs.existsSync(wavPath)) {
+      fs.unlinkSync(wavPath);
+    }
     
     if (result.success) {
-      // Send SMS with the Firebase-hosted minipod link
-      const smsMessage = `🎧 Your Morning MiniPod is ready! 
-
-Listen to your 2-minute parent-focused school update:
-${result.firebaseUrl}
-
-Have a great day! 📚`;
-      const smsResult = await sendSMS(phoneNumber, smsMessage);
-      
-      if (smsResult.success) {
-        res.json({ 
-          success: true, 
-          transcript: result.transcript,
-          summary: result.summary,
-          audioUrl: result.firebaseUrl,
-          phoneNumber: phoneNumber,
-          smsId: smsResult.messageId
-        });
-      } else {
-        res.json({ 
-          success: false, 
-          error: `SMS failed: ${smsResult.error}`,
-          transcript: result.transcript,
-          summary: result.summary,
-          audioUrl: result.firebaseUrl
-        });
-      }
+      // Return the audio URL for playback on the page
+      res.json({ 
+        success: true, 
+        transcript: result.transcript,
+        summary: result.summary,
+        audioUrl: result.firebaseUrl,
+        phoneNumber: phoneNumber
+      });
     } else {
       res.json({ 
         success: false, 
@@ -110,6 +122,19 @@ Have a great day! 📚`;
       fs.unlinkSync(req.file.path);
     }
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Test SMS endpoint
+app.post('/api/test-sms', async (req, res) => {
+  try {
+    console.log('🧪 Testing SMS to +13476108367...');
+    const smsResult = await sendSMS('+13476108367', 'hi jesse');
+    console.log('🧪 SMS test result:', smsResult);
+    res.json(smsResult);
+  } catch (err) {
+    console.error('🧪 SMS test error:', err);
+    res.json({ success: false, error: err.message });
   }
 });
 

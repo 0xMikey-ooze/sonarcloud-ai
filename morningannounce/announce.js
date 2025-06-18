@@ -5,14 +5,20 @@ import OpenAI from 'openai';
 import axios from 'axios';
 import ffmpeg from 'fluent-ffmpeg';
 import { fileURLToPath } from 'url';
-import { uploadToFirebase, cleanupLocalFile } from './firebase-config.js';
+import { uploadToSupabase, cleanupLocalFile } from './supabase-config.js';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+// Configure FFmpeg paths for macOS Homebrew installation
+ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg');
+ffmpeg.setFfprobePath('/opt/homebrew/bin/ffprobe');
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const elevenLabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
 
 // CONFIG: paths
 const ANNOUNCEMENT_AUDIO = path.join(__dirname, 'announcements', 'daily.mp3');
@@ -30,21 +36,70 @@ async function transcribeAudio(audioPath) {
   return resp.text;
 }
 
-// 2. Summarize for parents
+// 2. Summarize for parents with emotion tags for ElevenLabs
 async function summarizeText(text) {
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [{
       role: "user",
-      content: `Summarize the following school announcements into 200 words or less, selecting only information relevant to parents:\n\n${text}`
+      content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school’s morning announcements, generate a short, engaging audio script for today's episode.
+
+Please follow these exact rules:
+1. Max 350 words
+2. Short, natural spoken sentences (2–3 seconds when read aloud)
+3. Use square-bracket emotion tags only, e.g., [excited], [seriously], [laughs] — never use parentheses or emotion words outside brackets
+4. Sound like a cheerful, informed school host talking directly to parents
+5. Only include updates parents care about: trips, events, due dates, reminders, celebrations
+6. Make it flow like a mini morning show — start upbeat, transition smoothly, and close with encouragement
+7. Use pauses and human moments like [sighs], [laughs], [whispers] for warmth
+
+Approved emotion tags:
+- [excited], [happy], [cheerful] → for fun or good news
+- [seriously], [dramatically] → for important reminders
+- [laughs], [sighs] → for natural reactions
+- [whispers], [quietly] → for emphasis or side comments
+- [applause], [clapping] → for celebrations or student success
+
+Start with something like:
+"[happy] Good morning Oakville parents! [excited] Here’s what’s buzzing at school today…"
+
+Here are today’s raw announcements:
+
+${text}`
     }],
   });
   return completion.choices[0].message.content;
 }
 
-// 3. Generate TTS audio with ElevenLabs
+// 3. Generate TTS audio with ElevenLabs (Rachel voice - tested working)
 async function textToSpeech(text, outputPath) {
-  const voiceId = '56AoDkrOh6qfVPDXZ7Pt'; // Custom voice for morning announcements
+  const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel voice (confirmed working)
+  
+  // Clean up text to ensure proper emotion tag format for ElevenLabs
+  let cleanText = text
+    .replace(/\(([^)]+)\)/g, '[$1]') // Convert (emotion) to [emotion]
+    .replace(/\[([^\]]+)\]/g, (_, emotion) => {
+      // Comprehensive list of valid ElevenLabs tags
+      const validTags = [
+        // Emotional Tags
+        'excited', 'sad', 'angry', 'crying', 'sarcastic', 'happy', 'curious', 'mischievously',
+        // Delivery Style Tags
+        'whispers', 'shouts', 'quietly', 'dramatically', 'seriously',
+        // Non-Verbal Human Reactions
+        'laughs', 'laughs harder', 'starts laughing', 'sighs', 'exhales', 'snorts', 'clears throat', 'gulps', 'swallows',
+        // Creative or Fun Tags
+        'sings', 'woo', 'fart',
+        // Accent Tags
+        'american accent', 'british accent', 'strong french accent', 'strong german accent',
+        // Sound Effects
+        'applause', 'clapping', 'gunshot', 'door slams'
+      ];
+      const cleanEmotion = emotion.toLowerCase().trim();
+      return validTags.includes(cleanEmotion) ? `[${cleanEmotion}]` : '';
+    });
+  
+  console.log('🎤 Processed text for TTS:', cleanText);
+  
   const response = await axios({
     method: 'POST',
     url: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
@@ -53,11 +108,12 @@ async function textToSpeech(text, outputPath) {
       'Content-Type': 'application/json',
     },
     data: {
-      text: text,
-      model_id: 'eleven_multilingual_v2',
+      text: cleanText,
+      model_id: 'eleven_multilingual_v2' // v2 model with better emotion support
     },
     responseType: 'stream',
   });
+  
   const stream = fs.createWriteStream(outputPath);
   response.data.pipe(stream);
   return new Promise((resolve) => stream.on('finish', resolve));
@@ -66,10 +122,18 @@ async function textToSpeech(text, outputPath) {
 // 4. Merge intro, summary, outro into final pod
 function stitchAudio(intro, summary, outro, output) {
   return new Promise((resolve, reject) => {
-    ffmpeg()
-      .input(intro)
-      .input(summary)
-      .input(outro)
+    const ffmpegCommand = ffmpeg();
+    
+    // Add inputs that exist
+    if (intro && fs.existsSync(intro)) {
+      ffmpegCommand.input(intro);
+    }
+    ffmpegCommand.input(summary);
+    if (outro && fs.existsSync(outro)) {
+      ffmpegCommand.input(outro);
+    }
+    
+    ffmpegCommand
       .on('end', resolve)
       .on('error', reject)
       .mergeToFile(output, path.dirname(output));
@@ -77,7 +141,7 @@ function stitchAudio(intro, summary, outro, output) {
 }
 
 // MAIN LOGIC - Process uploaded audio and create minipod
-async function processRecordingToMiniPod(audioPath, phoneNumber) {
+async function processRecordingToMiniPod(audioPath) {
   try {
     console.log('🔊 Transcribing audio...');
     const transcript = await transcribeAudio(audioPath);
@@ -93,22 +157,23 @@ async function processRecordingToMiniPod(audioPath, phoneNumber) {
     const finalPodPath = path.join(__dirname, 'generated-pods', `morning_minipod_${Date.now()}.mp3`);
     await stitchAudio(INTRO_AUDIO, summaryAudioPath, OUTRO_AUDIO, finalPodPath);
 
-    console.log('☁️ Uploading MiniPod to Firebase Storage...');
-    const finalPodName = `minipod_${Date.now()}_${phoneNumber.replace(/[^0-9]/g, '')}.mp3`;
-    const firebaseUrl = await uploadToFirebase(finalPodPath, finalPodName);
-
-    console.log('🗑️ Cleaning up local files...');
+    // Upload to Supabase Storage
+    console.log('📱 Uploading MiniPod to Supabase...');
+    const fileName = path.basename(finalPodPath);
+    const supabaseUrl = await uploadToSupabase(finalPodPath, fileName);
+    console.log(`🎵 Supabase audio URL: ${supabaseUrl}`);
+    
+    // Clean up temp files
+    console.log('🗑️ Cleaning up temp files...');
     cleanupLocalFile(summaryAudioPath);
     cleanupLocalFile(finalPodPath);
-
-    console.log(`✅ Morning MiniPod uploaded to Firebase: ${firebaseUrl}`);
     
     return {
       success: true,
       transcript: transcript,
       summary: summary,
-      firebaseUrl: firebaseUrl,
-      podName: finalPodName
+      firebaseUrl: supabaseUrl,
+      podName: fileName
     };
   } catch (err) {
     console.error('❌ Error generating MiniPod:', err);

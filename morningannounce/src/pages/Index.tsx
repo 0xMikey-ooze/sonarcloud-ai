@@ -14,6 +14,7 @@ const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [processingStep, setProcessingStep] = useState('');
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState('');
   const [processingProgress, setProcessingProgress] = useState(0);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -93,10 +94,10 @@ const Index = () => {
   };
 
   const sendAnnouncement = async () => {
-    if (!audioBlob || !phoneNumber) {
+    if (!audioBlob) {
       toast({
-        title: "Missing Information",
-        description: "Please record audio and enter a phone number.",
+        title: "Missing Audio",
+        description: "Please record audio first.",
         variant: "destructive",
       });
       return;
@@ -112,7 +113,6 @@ const Index = () => {
       
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.wav');
-      formData.append('phoneNumber', phoneNumber);
 
       // Step 2: Processing with AI
       setProcessingStep('Processing speech with AI...');
@@ -131,9 +131,11 @@ const Index = () => {
 
       if (data.success) {
         // Step 3: Displaying results
-        setProcessingStep('Generating transcript...');
+        setProcessingStep('Generating morning announcement...');
         setProcessingProgress(75);
         setTranscript(data.transcript);
+        setGeneratedAudioUrl(data.audioUrl);
+        console.log('Generated audio URL:', data.audioUrl);
 
         // Step 4: Complete
         setProcessingStep('Complete!');
@@ -141,14 +143,13 @@ const Index = () => {
 
         toast({
           title: "Success!",
-          description: `Audio processed and sent to ${phoneNumber}`,
+          description: "Your Morning MiniPod is ready to play!",
         });
 
-        // Reset form after success
+        // Reset form after success (but keep generated audio)
         setTimeout(() => {
           setAudioBlob(null);
           setRecordingTime(0);
-          setPhoneNumber('');
           setProcessingStep('');
           setProcessingProgress(0);
         }, 3000);
@@ -179,8 +180,8 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Voice Recorder</h1>
-          <p className="text-lg text-gray-600">Record up to 4 minutes and get AI-powered transcription via SMS</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Morning MiniPod Creator</h1>
+          <p className="text-lg text-gray-600">Record your school announcements and generate a parent-focused audio summary</p>
         </div>
 
         <Card className="mb-6">
@@ -247,33 +248,12 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              Phone Number
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Input
-              type="tel"
-              placeholder="Enter phone number (e.g., +1234567890)"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="text-lg"
-              disabled={isProcessing}
-            />
-            <p className="text-sm text-gray-500 mt-2">
-              The transcription will be sent to this number via SMS
-            </p>
-          </CardContent>
-        </Card>
 
-        {/* Send Announcement Button */}
+        {/* Generate MiniPod Button */}
         <div className="text-center mb-6">
           <Button
             onClick={sendAnnouncement}
-            disabled={!audioBlob || !phoneNumber || isProcessing}
+            disabled={!audioBlob || isProcessing}
             size="lg"
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
           >
@@ -285,7 +265,7 @@ const Index = () => {
             ) : (
               <>
                 <Send className="h-5 w-5 mr-2" />
-                Send Announcement
+                Generate Morning MiniPod
               </>
             )}
           </Button>
@@ -313,14 +293,42 @@ const Index = () => {
           </Card>
         )}
 
-        {/* Completion Status */}
-        {processingStep === 'Complete!' && (
+        {/* Generated MiniPod Player */}
+        {generatedAudioUrl && (
           <Card className="mb-6 border-green-200 bg-green-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center gap-2 text-green-600">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-600">
                 <CheckCircle className="h-6 w-6" />
-                <span className="font-medium">Announcement sent successfully!</span>
+                Your Morning MiniPod is Ready!
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white rounded-lg p-4 border border-green-200">
+                <audio
+                  controls
+                  src={generatedAudioUrl}
+                  className="w-full"
+                  preload="auto"
+                  onError={(e) => console.error('Audio error:', e)}
+                  onLoadStart={() => console.log('Audio loading started')}
+                  onCanPlay={() => console.log('Audio can play')}
+                >
+                  Your browser does not support the audio element.
+                </audio>
+                <div className="mt-2 text-center">
+                  <a 
+                    href={generatedAudioUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  >
+                    Download Audio File
+                  </a>
+                </div>
               </div>
+              <p className="text-sm text-green-600 text-center">
+                ✨ Complete with intro, your summarized announcement, and outro
+              </p>
             </CardContent>
           </Card>
         )}
@@ -337,15 +345,6 @@ const Index = () => {
           </Card>
         )}
 
-        {/* Instructions */}
-        <div className="text-center text-sm text-gray-500 mt-8">
-          <p>Note: This is a demo. In production, you would need:</p>
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Speech-to-text API (OpenAI Whisper, Google Speech, etc.)</li>
-            <li>SMS service (Twilio, AWS SNS, etc.)</li>
-            <li>Backend API to handle processing and SMS sending</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
