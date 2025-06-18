@@ -47,21 +47,13 @@ async function summarizeText(text) {
 Please follow these exact rules:
 1. Max 350 words
 2. Short, natural spoken sentences (2–3 seconds when read aloud)
-3. Use square-bracket emotion tags only, e.g., [excited], [seriously], [laughs] — never use parentheses or emotion words outside brackets
-4. Sound like a cheerful, informed school host talking directly to parents
-5. Only include updates parents care about: trips, events, due dates, reminders, celebrations
-6. Make it flow like a mini morning show — start upbeat, transition smoothly, and close with encouragement
-7. Use pauses and human moments like [sighs], [laughs], [whispers] for warmth
-
-Approved emotion tags:
-- [excited], [happy], [cheerful] → for fun or good news
-- [seriously], [dramatically] → for important reminders
-- [laughs], [sighs] → for natural reactions
-- [whispers], [quietly] → for emphasis or side comments
-- [applause], [clapping] → for celebrations or student success
+3. Sound like a cheerful, informed school host talking directly to parents
+4. Only include updates parents care about: trips, events, due dates, reminders, celebrations
+5. Make it flow like a mini morning show — start upbeat, transition smoothly, and close with encouragement
+6. Use pauses and human moments for warmth and naturalness
 
 Start with something like:
-"[happy] Good morning Oakville parents! [excited] Here’s what’s buzzing at school today…"
+"Good morning Oakville parents! Here’s what’s buzzing at school today…"
 
 Here are today’s raw announcements:
 
@@ -76,27 +68,7 @@ async function textToSpeech(text, outputPath) {
   const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel voice (confirmed working)
   
   // Clean up text to ensure proper emotion tag format for ElevenLabs
-  let cleanText = text
-    .replace(/\(([^)]+)\)/g, '[$1]') // Convert (emotion) to [emotion]
-    .replace(/\[([^\]]+)\]/g, (_, emotion) => {
-      // Comprehensive list of valid ElevenLabs tags
-      const validTags = [
-        // Emotional Tags
-        'excited', 'sad', 'angry', 'crying', 'sarcastic', 'happy', 'curious', 'mischievously',
-        // Delivery Style Tags
-        'whispers', 'shouts', 'quietly', 'dramatically', 'seriously',
-        // Non-Verbal Human Reactions
-        'laughs', 'laughs harder', 'starts laughing', 'sighs', 'exhales', 'snorts', 'clears throat', 'gulps', 'swallows',
-        // Creative or Fun Tags
-        'sings', 'woo', 'fart',
-        // Accent Tags
-        'american accent', 'british accent', 'strong french accent', 'strong german accent',
-        // Sound Effects
-        'applause', 'clapping', 'gunshot', 'door slams'
-      ];
-      const cleanEmotion = emotion.toLowerCase().trim();
-      return validTags.includes(cleanEmotion) ? `[${cleanEmotion}]` : '';
-    });
+  let cleanText = text;
   
   console.log('🎤 Processed text for TTS:', cleanText);
   
@@ -109,7 +81,11 @@ async function textToSpeech(text, outputPath) {
     },
     data: {
       text: cleanText,
-      model_id: 'eleven_multilingual_v2' // v2 model with better emotion support
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: 0.3,
+        similarity_boost: 0.5
+      }
     },
     responseType: 'stream',
   });

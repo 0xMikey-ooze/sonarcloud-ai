@@ -3,6 +3,7 @@ import path from 'path';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import formidable from 'formidable';
+import ffmpeg from 'fluent-ffmpeg';
 
 // Import announce.js functions - we'll need to convert these
 import OpenAI from 'openai';
@@ -31,16 +32,21 @@ async function summarizeText(text) {
     model: "gpt-4o",
     messages: [{
       role: "user",
-      content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school's morning announcements, generate a short, engaging audio script for today's episode.
+      content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school's morning announcements, generate a COMPLETE audio script for today's episode with intro, content, and outro.
 
 Please follow these exact rules:
-1. Max 350 words
+1. Max 400 words total (including intro and outro)
 2. Short, natural spoken sentences (2–3 seconds when read aloud)
 3. Use square-bracket emotion tags only, e.g., [excited], [seriously], [laughs] — never use parentheses or emotion words outside brackets
 4. Sound like a cheerful, informed school host talking directly to parents
 5. Only include updates parents care about: trips, events, due dates, reminders, celebrations
-6. Make it flow like a mini morning show — start upbeat, transition smoothly, and close with encouragement
+6. Make it flow like a complete mini morning show with intro, main content, and outro
 7. Use pauses and human moments like [sighs], [laughs], [whispers] for warmth
+
+STRUCTURE:
+- INTRO: Welcome parents warmly, mention it's the Morning MiniPod
+- MAIN CONTENT: Announcements that matter to parents
+- OUTRO: Encouraging sign-off, remind them to have a great day
 
 Approved emotion tags:
 - [excited], [happy], [cheerful] → for fun or good news
@@ -49,8 +55,10 @@ Approved emotion tags:
 - [whispers], [quietly] → for emphasis or side comments
 - [applause], [clapping] → for celebrations or student success
 
-Start with something like:
-"[happy] Good morning Oakville parents! [excited] Here's what's buzzing at school today…"
+Example structure:
+"[happy] Good morning parents! Welcome to your Morning MiniPod. [excited] Here's what's buzzing at school today…
+[content from announcements]
+[cheerful] That's all for today's MiniPod! Have a wonderful day with your kids. [happy] We'll see you tomorrow!"
 
 Here are today's raw announcements:
 
@@ -99,6 +107,43 @@ async function textToSpeech(text, outputPath) {
   const stream = fs.createWriteStream(outputPath);
   response.data.pipe(stream);
   return new Promise((resolve) => stream.on('finish', resolve));
+}
+
+// Stitch audio files together using ffmpeg
+function stitchAudio(intro, summary, outro, output) {
+  return new Promise((resolve, reject) => {
+    const ffmpegCommand = ffmpeg();
+    
+    // Add inputs that exist
+    if (intro && fs.existsSync(intro)) {
+      console.log('🎵 Adding intro:', intro);
+      ffmpegCommand.input(intro);
+    }
+    
+    if (summary && fs.existsSync(summary)) {
+      console.log('🎵 Adding summary:', summary);
+      ffmpegCommand.input(summary);
+    }
+    
+    if (outro && fs.existsSync(outro)) {
+      console.log('🎵 Adding outro:', outro);
+      ffmpegCommand.input(outro);
+    }
+    
+    ffmpegCommand
+      .on('start', (commandLine) => {
+        console.log('🔧 FFmpeg command:', commandLine);
+      })
+      .on('end', () => {
+        console.log('✅ Audio stitching completed');
+        resolve();
+      })
+      .on('error', (err) => {
+        console.error('❌ FFmpeg error:', err);
+        reject(err);
+      })
+      .mergeToFile(output, path.dirname(output));
+  });
 }
 
 // Upload file to Supabase Storage
@@ -150,18 +195,34 @@ async function processRecordingToMiniPod(audioPath) {
     await textToSpeech(summary, summaryAudioPath);
     console.log('✅ TTS completed, file size:', fs.existsSync(summaryAudioPath) ? fs.statSync(summaryAudioPath).size : 'File not found');
 
+    console.log('🔗 Step 4: Stitching intro + summary + outro...');
+    const finalPodPath = path.join(tmpdir(), `morning_minipod_${Date.now()}.mp3`);
+    
+    // Define paths to intro and outro (relative to project root)
+    const introPath = path.join(process.cwd(), 'audio-assets', 'intro.mp3');
+    const outroPath = path.join(process.cwd(), 'audio-assets', 'outro.mp3');
+    
+    console.log('🎵 Intro path:', introPath, 'exists:', fs.existsSync(introPath));
+    console.log('🎵 Outro path:', outroPath, 'exists:', fs.existsSync(outroPath));
+    
+    await stitchAudio(introPath, summaryAudioPath, outroPath, finalPodPath);
+    console.log('✅ Stitching completed, final file size:', fs.existsSync(finalPodPath) ? fs.statSync(finalPodPath).size : 'File not found');
+
     // Upload to Supabase Storage
-    console.log('📱 Step 4: Uploading MiniPod to Supabase...');
+    console.log('📱 Step 5: Uploading complete MiniPod to Supabase...');
     const fileName = `morning_minipod_${Date.now()}.mp3`;
-    const supabaseUrl = await uploadToSupabase(summaryAudioPath, fileName);
+    const supabaseUrl = await uploadToSupabase(finalPodPath, fileName);
     console.log(`✅ Upload completed: ${supabaseUrl}`);
     
     // Clean up temp files
-    console.log('🗑️ Step 5: Cleaning up temp files...');
+    console.log('🗑️ Step 6: Cleaning up temp files...');
     if (fs.existsSync(summaryAudioPath)) {
       fs.unlinkSync(summaryAudioPath);
-      console.log('✅ Cleanup completed');
     }
+    if (fs.existsSync(finalPodPath)) {
+      fs.unlinkSync(finalPodPath);
+    }
+    console.log('✅ Cleanup completed');
     
     return {
       success: true,
