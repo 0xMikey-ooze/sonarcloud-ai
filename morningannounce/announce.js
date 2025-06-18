@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Configure FFmpeg paths for macOS Homebrew installation
-ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg');
-ffmpeg.setFfprobePath('/opt/homebrew/bin/ffprobe');
+// ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg');
+// ffmpeg.setFfprobePath('/opt/homebrew/bin/ffprobe');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const elevenLabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
@@ -42,7 +42,7 @@ async function summarizeText(text) {
     model: "gpt-4o",
     messages: [{
       role: "user",
-      content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school’s morning announcements, generate a short, engaging audio script for today's episode.
+      content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school's morning announcements, generate a short, engaging audio script for today's episode.
 
 Please follow these exact rules:
 1. Max 350 words
@@ -53,9 +53,9 @@ Please follow these exact rules:
 6. Use pauses and human moments for warmth and naturalness
 
 Start with something like:
-"Good morning Oakville parents! Here’s what’s buzzing at school today…"
+"Good morning Oakville parents! Here's what's buzzing at school today…"
 
-Here are today’s raw announcements:
+Here are today's raw announcements:
 
 ${text}`
     }],
