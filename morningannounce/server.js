@@ -123,9 +123,13 @@ app.post('/api/generate', async (req, res) => {
 // Serve built React app
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Serve React app for non-API routes (SPA)
-app.get('*', (req, res) => {
-  // Don't intercept API routes
+// Serve React app for root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// Catch-all for unknown routes (must be last)
+app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
