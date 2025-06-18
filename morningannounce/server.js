@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
-import twilio from 'twilio';
 import dotenv from 'dotenv';
 import { generateMiniPod, processRecordingToMiniPod } from './announce.js';
 import { fileURLToPath } from 'url';
@@ -14,9 +13,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Initialize Twilio client
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -58,31 +54,11 @@ if (!fs.existsSync('generated-pods')) {
   fs.mkdirSync('generated-pods');
 }
 
-// Function to send SMS via Twilio
-async function sendSMS(phoneNumber, message) {
-  try {
-    const result = await twilioClient.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phoneNumber
-    });
-    return { success: true, messageId: result.sid };
-  } catch (error) {
-    console.error('Twilio SMS error:', error);
-    return { success: false, error: error.message };
-  }
-}
-
 // API endpoint for processing audio from React app
 app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No audio file provided' });
-    }
-
-    const { phoneNumber } = req.body;
-    if (!phoneNumber) {
-      return res.status(400).json({ success: false, error: 'Phone number required' });
     }
 
     const audioPath = req.file.path;
@@ -105,8 +81,7 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
         success: true, 
         transcript: result.transcript,
         summary: result.summary,
-        audioUrl: result.firebaseUrl,
-        phoneNumber: phoneNumber
+        audioUrl: result.firebaseUrl
       });
     } else {
       res.json({ 
