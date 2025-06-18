@@ -149,9 +149,12 @@ app.post('/api/generate', async (req, res) => {
   }
 });
 
-// Serve React app for root (will switch to this)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// Serve built React app
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Serve React app for all routes (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
