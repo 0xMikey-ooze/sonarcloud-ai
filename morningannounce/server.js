@@ -100,15 +100,11 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
   }
 });
 
-// Test SMS endpoint
-app.post('/api/test-sms', async (req, res) => {
+// Test endpoint
+app.post('/api/test', async (req, res) => {
   try {
-    console.log('🧪 Testing SMS to +13476108367...');
-    const smsResult = await sendSMS('+13476108367', 'hi jesse');
-    console.log('🧪 SMS test result:', smsResult);
-    res.json(smsResult);
+    res.json({ success: true, message: 'API is working!' });
   } catch (err) {
-    console.error('🧪 SMS test error:', err);
     res.json({ success: false, error: err.message });
   }
 });
@@ -127,8 +123,12 @@ app.post('/api/generate', async (req, res) => {
 // Serve built React app
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Serve React app for all routes (SPA)
+// Serve React app for non-API routes (SPA)
 app.get('*', (req, res) => {
+  // Don't intercept API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
