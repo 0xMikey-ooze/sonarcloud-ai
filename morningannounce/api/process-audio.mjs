@@ -3,7 +3,6 @@ import path from 'path';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import formidable from 'formidable';
-import ffmpeg from 'fluent-ffmpeg';
 
 // Import announce.js functions - we'll need to convert these
 import OpenAI from 'openai';
@@ -109,42 +108,6 @@ async function textToSpeech(text, outputPath) {
   return new Promise((resolve) => stream.on('finish', resolve));
 }
 
-// Stitch audio files together using ffmpeg
-function stitchAudio(intro, summary, outro, output) {
-  return new Promise((resolve, reject) => {
-    const ffmpegCommand = ffmpeg();
-    
-    // Add inputs that exist
-    if (intro && fs.existsSync(intro)) {
-      console.log('🎵 Adding intro:', intro);
-      ffmpegCommand.input(intro);
-    }
-    
-    if (summary && fs.existsSync(summary)) {
-      console.log('🎵 Adding summary:', summary);
-      ffmpegCommand.input(summary);
-    }
-    
-    if (outro && fs.existsSync(outro)) {
-      console.log('🎵 Adding outro:', outro);
-      ffmpegCommand.input(outro);
-    }
-    
-    ffmpegCommand
-      .on('start', (commandLine) => {
-        console.log('🔧 FFmpeg command:', commandLine);
-      })
-      .on('end', () => {
-        console.log('✅ Audio stitching completed');
-        resolve();
-      })
-      .on('error', (err) => {
-        console.error('❌ FFmpeg error:', err);
-        reject(err);
-      })
-      .mergeToFile(output, path.dirname(output));
-  });
-}
 
 // Upload file to Supabase Storage
 async function uploadToSupabase(filePath, fileName, bucketName = 'audio-files') {
@@ -190,37 +153,21 @@ async function processRecordingToMiniPod(audioPath) {
     const summary = await summarizeText(transcript);
     console.log('✅ Summary completed, length:', summary.length);
 
-    console.log('🎤 Step 3: Converting summary to speech with ElevenLabs...');
-    const summaryAudioPath = path.join(tmpdir(), `summary_${Date.now()}.mp3`);
-    await textToSpeech(summary, summaryAudioPath);
-    console.log('✅ TTS completed, file size:', fs.existsSync(summaryAudioPath) ? fs.statSync(summaryAudioPath).size : 'File not found');
-
-    console.log('🔗 Step 4: Stitching intro + summary + outro...');
-    const finalPodPath = path.join(tmpdir(), `morning_minipod_${Date.now()}.mp3`);
-    
-    // Define paths to intro and outro (relative to project root)
-    const introPath = path.join(process.cwd(), 'audio-assets', 'intro.mp3');
-    const outroPath = path.join(process.cwd(), 'audio-assets', 'outro.mp3');
-    
-    console.log('🎵 Intro path:', introPath, 'exists:', fs.existsSync(introPath));
-    console.log('🎵 Outro path:', outroPath, 'exists:', fs.existsSync(outroPath));
-    
-    await stitchAudio(introPath, summaryAudioPath, outroPath, finalPodPath);
-    console.log('✅ Stitching completed, final file size:', fs.existsSync(finalPodPath) ? fs.statSync(finalPodPath).size : 'File not found');
+    console.log('🎤 Step 3: Converting complete script (with intro/outro) to speech...');
+    const finalAudioPath = path.join(tmpdir(), `morning_minipod_${Date.now()}.mp3`);
+    await textToSpeech(summary, finalAudioPath);
+    console.log('✅ TTS completed, file size:', fs.existsSync(finalAudioPath) ? fs.statSync(finalAudioPath).size : 'File not found');
 
     // Upload to Supabase Storage
-    console.log('📱 Step 5: Uploading complete MiniPod to Supabase...');
+    console.log('📱 Step 4: Uploading complete MiniPod to Supabase...');
     const fileName = `morning_minipod_${Date.now()}.mp3`;
-    const supabaseUrl = await uploadToSupabase(finalPodPath, fileName);
+    const supabaseUrl = await uploadToSupabase(finalAudioPath, fileName);
     console.log(`✅ Upload completed: ${supabaseUrl}`);
     
     // Clean up temp files
-    console.log('🗑️ Step 6: Cleaning up temp files...');
-    if (fs.existsSync(summaryAudioPath)) {
-      fs.unlinkSync(summaryAudioPath);
-    }
-    if (fs.existsSync(finalPodPath)) {
-      fs.unlinkSync(finalPodPath);
+    console.log('🗑️ Step 5: Cleaning up temp files...');
+    if (fs.existsSync(finalAudioPath)) {
+      fs.unlinkSync(finalAudioPath);
     }
     console.log('✅ Cleanup completed');
     
