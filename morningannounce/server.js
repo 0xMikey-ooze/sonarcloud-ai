@@ -31,20 +31,8 @@ app.use('/generated-pods', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, 'generated-pods')));
 
-// Set proper MIME types for TypeScript and JavaScript modules
-app.use(express.static(__dirname, {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.tsx') || path.endsWith('.ts')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-    if (path.endsWith('.js') || path.endsWith('.jsx')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-    if (path.endsWith('.mjs')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-  }
-}));
+// Serve built React assets from dist folder only
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Ensure uploads and generated-pods directories exist
 if (!fs.existsSync('uploads')) {
@@ -120,8 +108,6 @@ app.post('/api/generate', async (req, res) => {
   }
 });
 
-// Serve built React app
-app.use(express.static(path.join(__dirname, 'dist')));
 
 // Serve React app for root route
 app.get('/', (req, res) => {
