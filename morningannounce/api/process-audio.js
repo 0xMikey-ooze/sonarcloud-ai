@@ -1,13 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const { writeFile } = require('fs/promises');
-const { tmpdir } = require('os');
-const formidable = require('formidable');
+import fs from 'fs';
+import path from 'path';
+import { writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import formidable from 'formidable';
 
 // Import announce.js functions - we'll need to convert these
-const OpenAI = require('openai');
-const axios = require('axios');
-const { createClient } = require('@supabase/supabase-js');
+import OpenAI from 'openai';
+import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -137,26 +137,30 @@ async function uploadToSupabase(filePath, fileName, bucketName = 'audio-files') 
 // Process uploaded audio and create minipod
 async function processRecordingToMiniPod(audioPath) {
   try {
-    console.log('🔊 Transcribing audio...');
+    console.log('🔊 Step 1: Transcribing audio with OpenAI Whisper...');
     const transcript = await transcribeAudio(audioPath);
+    console.log('✅ Transcription completed, length:', transcript.length);
 
-    console.log('📝 Summarizing for parents (2-minute relevant content)...');
+    console.log('📝 Step 2: Summarizing for parents with GPT-4...');
     const summary = await summarizeText(transcript);
+    console.log('✅ Summary completed, length:', summary.length);
 
-    console.log('🎤 Converting summary to speech...');
+    console.log('🎤 Step 3: Converting summary to speech with ElevenLabs...');
     const summaryAudioPath = path.join(tmpdir(), `summary_${Date.now()}.mp3`);
     await textToSpeech(summary, summaryAudioPath);
+    console.log('✅ TTS completed, file size:', fs.existsSync(summaryAudioPath) ? fs.statSync(summaryAudioPath).size : 'File not found');
 
     // Upload to Supabase Storage
-    console.log('📱 Uploading MiniPod to Supabase...');
+    console.log('📱 Step 4: Uploading MiniPod to Supabase...');
     const fileName = `morning_minipod_${Date.now()}.mp3`;
     const supabaseUrl = await uploadToSupabase(summaryAudioPath, fileName);
-    console.log(`🎵 Supabase audio URL: ${supabaseUrl}`);
+    console.log(`✅ Upload completed: ${supabaseUrl}`);
     
     // Clean up temp files
-    console.log('🗑️ Cleaning up temp files...');
+    console.log('🗑️ Step 5: Cleaning up temp files...');
     if (fs.existsSync(summaryAudioPath)) {
       fs.unlinkSync(summaryAudioPath);
+      console.log('✅ Cleanup completed');
     }
     
     return {
@@ -167,47 +171,77 @@ async function processRecordingToMiniPod(audioPath) {
       podName: fileName
     };
   } catch (err) {
-    console.error('❌ Error generating MiniPod:', err);
+    console.error('❌ Error in processRecordingToMiniPod:', err);
+    console.error('❌ Stack trace:', err.stack);
     return {
       success: false,
-      error: err.message
+      error: `Processing failed: ${err.message}`
     };
   }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    console.log('🚀 Starting audio processing...');
+    
+    // Check environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('❌ Missing OPENAI_API_KEY');
+      return res.status(500).json({ success: false, error: 'Missing OpenAI API key configuration' });
+    }
+    if (!process.env.ELEVENLABS_API_KEY) {
+      console.error('❌ Missing ELEVENLABS_API_KEY');
+      return res.status(500).json({ success: false, error: 'Missing ElevenLabs API key configuration' });
+    }
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ Missing Supabase configuration');
+      return res.status(500).json({ success: false, error: 'Missing Supabase configuration' });
+    }
+    
+    console.log('✅ Environment variables checked');
+
     // Parse the multipart form data
     const form = formidable({
       maxFileSize: 50 * 1024 * 1024, // 50MB limit
     });
 
+    console.log('📤 Parsing form data...');
     const [fields, files] = await form.parse(req);
+    console.log('📤 Form parsed, files:', Object.keys(files));
     
     if (!files.audio || !files.audio[0]) {
+      console.error('❌ No audio file in request');
       return res.status(400).json({ success: false, error: 'No audio file provided' });
     }
 
     const audioFile = files.audio[0];
+    console.log('🎵 Audio file received:', audioFile.originalFilename, 'Size:', audioFile.size);
 
     // Create temporary file in Vercel's tmp directory
     const tempDir = tmpdir();
     const tempFilePath = path.join(tempDir, `upload-${Date.now()}.wav`);
     
+    console.log('💾 Saving to temp file:', tempFilePath);
+    
     // Copy uploaded file to temp location with .wav extension
     const fileBuffer = fs.readFileSync(audioFile.filepath);
     await writeFile(tempFilePath, fileBuffer);
     
+    console.log('✅ File saved, starting processing...');
+    
     // Process recording to create complete minipod
     const result = await processRecordingToMiniPod(tempFilePath);
+    
+    console.log('🎯 Processing result:', result.success ? 'SUCCESS' : 'FAILED');
     
     // Clean up temp file
     try {
       fs.unlinkSync(tempFilePath);
+      console.log('🗑️ Temp file cleaned up');
     } catch (e) {
       console.warn('Could not clean up temp file:', e.message);
     }
@@ -220,6 +254,7 @@ module.exports = async function handler(req, res) {
         audioUrl: result.firebaseUrl
       });
     } else {
+      console.error('❌ Processing failed:', result.error);
       return res.json({ 
         success: false, 
         error: result.error
@@ -227,7 +262,7 @@ module.exports = async function handler(req, res) {
     }
     
   } catch (err) {
-    console.error('Error processing audio:', err);
-    return res.status(500).json({ success: false, error: err.message });
+    console.error('❌ Handler error:', err);
+    return res.status(500).json({ success: false, error: `Handler error: ${err.message}` });
   }
 };
