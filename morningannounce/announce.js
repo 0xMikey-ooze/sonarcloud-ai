@@ -13,9 +13,25 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-// Configure FFmpeg paths for macOS Homebrew installation
-// ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg');
-// ffmpeg.setFfprobePath('/opt/homebrew/bin/ffprobe');
+// Configure FFmpeg paths based on environment
+// On Heroku, FFmpeg is available via buildpack in system PATH
+// On local macOS with Homebrew, we may need to specify the path
+if (process.env.NODE_ENV !== 'production' && process.platform === 'darwin') {
+  // Only set paths for local macOS development if the binaries exist
+  const homebrewFfmpeg = '/opt/homebrew/bin/ffmpeg';
+  const homebrewFfprobe = '/opt/homebrew/bin/ffprobe';
+  
+  if (fs.existsSync(homebrewFfmpeg) && fs.existsSync(homebrewFfprobe)) {
+    ffmpeg.setFfmpegPath(homebrewFfmpeg);
+    ffmpeg.setFfprobePath(homebrewFfprobe);
+    console.log('🔧 Using Homebrew FFmpeg paths for local development');
+  } else {
+    console.log('🔧 Using system PATH for FFmpeg (Homebrew not found or not needed)');
+  }
+} else {
+  // Production (Heroku) or other environments - use system PATH
+  console.log('🔧 Using system PATH for FFmpeg (production environment)');
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const elevenLabsClient = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
