@@ -7,6 +7,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { fileURLToPath } from 'url';
 import { uploadToSupabase, cleanupLocalFile } from './supabase-config.js';
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,7 +109,21 @@ async function textToSpeech(text, outputPath) {
   
   const stream = fs.createWriteStream(outputPath);
   response.data.pipe(stream);
-  return new Promise((resolve) => stream.on('finish', resolve));
+  await new Promise((resolve) => stream.on('finish', resolve));
+
+  // Apply gain (e.g., +5dB)
+  const boostedPath = outputPath.replace('.mp3', '_boosted.mp3');
+  await new Promise((resolve, reject) => {
+    exec(`ffmpeg -i "${outputPath}" -filter:a "volume=5dB" -y "${boostedPath}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error('❌ Error boosting volume:', error);
+        reject(error);
+      } else {
+        fs.renameSync(boostedPath, outputPath);
+        resolve();
+      }
+    });
+  });
 }
 
 // 4. Merge intro, summary, outro into final pod
