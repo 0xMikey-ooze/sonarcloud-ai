@@ -61,7 +61,7 @@ async function summarizeText(text) {
       content: `You are the host of a lively, friendly school morning podcast made just for parents. Based on the school's morning announcements, generate a short, engaging audio script for today's episode.
 
 Please follow these exact rules:
-1. Max 350 words
+1. Max 375 words
 2. Short, natural spoken sentences (2–3 seconds when read aloud)
 3. Sound like a cheerful, informed school host talking directly to parents
 4. Only include updates parents care about: trips, events, due dates, reminders, celebrations
@@ -69,7 +69,7 @@ Please follow these exact rules:
 6. Use pauses and human moments for warmth and naturalness
 
 Start with something like:
-"Good morning Oakville parents! Here's what's buzzing at school today…"
+"Good morning parents! Here's what's buzzing at school today…"
 
 Here are today's raw announcements:
 
