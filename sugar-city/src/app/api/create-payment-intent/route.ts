@@ -195,8 +195,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // Scrub PII from logs - don't log sensitive data
     log.error('POST /api/create-payment-intent error', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, error: 'Internal server error', code: 'SERVER_ERROR' },
+      { success: false, error: errorMessage, code: 'SERVER_ERROR' },
       { status: 500 }
     );
   }

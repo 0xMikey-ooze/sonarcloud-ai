@@ -267,6 +267,11 @@ const BookingWidget = ({ forwardedRef }: { forwardedRef: React.RefObject<HTMLDiv
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}: ${response.statusText}` }));
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create payment intent`);
+      }
+
       const result = await response.json();
       if (result.success) {
         setPricing(result.data.pricing);
@@ -278,10 +283,12 @@ const BookingWidget = ({ forwardedRef }: { forwardedRef: React.RefObject<HTMLDiv
              setCouponStatus("invalid");
         }
       } else {
-        setError(result.error);
+        setError(result.error || "Failed to calculate pricing");
       }
-    } catch {
-      setError("Failed to calculate pricing");
+    } catch (error) {
+      console.error("Error calculating pricing:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to calculate pricing";
+      setError(errorMessage);
     }
   }, [selectedTour, details.pax, details.adultPax, details.childPax, couponCode]);
 
