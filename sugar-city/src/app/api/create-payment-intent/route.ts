@@ -22,7 +22,8 @@ function getStripe(): Stripe {
     try {
       stripe = new Stripe(env.STRIPE_SECRET_KEY, {
         typescript: true,
-        apiVersion: '2024-12-18.acacia',
+        maxNetworkRetries: 2,
+        timeout: 30000, // 30 second timeout
       });
     } catch (error) {
       throw new Error(`Failed to initialize Stripe: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -191,23 +192,40 @@ export async function POST(request: NextRequest) {
     let paymentIntent;
     try {
       paymentIntent = await stripeInstance.paymentIntents.create({
-      amount: amountInCents,
-      currency: currency || 'usd',
-      automatic_payment_methods: { enabled: true },
-      metadata: {
-        tourId,
-        tourName: tourData.name,
-        pax: pax.toString(),
-        couponCode: couponCode || '',
-        discount: discount.toString(),
-        subtotal: subtotal.toString()
-      }
-    });
+        amount: amountInCents,
+        currency: currency || 'usd',
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          tourId,
+          tourName: tourData.name,
+          pax: pax.toString(),
+          couponCode: couponCode || '',
+          discount: discount.toString(),
+          subtotal: subtotal.toString()
+        }
+      }, {
+        maxNetworkRetries: 2,
+        timeout: 30000,
+      });
     } catch (stripeError: any) {
-      log.error('Stripe PaymentIntent creation failed', stripeError);
+      log.error('Stripe PaymentIntent creation failed', { 
+        error: stripeError?.message, 
+        type: stripeError?.type,
+        code: stripeError?.code,
+        statusCode: stripeError?.statusCode 
+      });
       const errorMessage = stripeError?.message || 'Failed to create payment intent';
+      const errorCode = stripeError?.code || 'STRIPE_PAYMENT_ERROR';
       return NextResponse.json(
-        { success: false, error: errorMessage, code: 'STRIPE_PAYMENT_ERROR', details: stripeError?.type },
+        { 
+          success: false, 
+          error: errorMessage, 
+          code: errorCode,
+          details: {
+            type: stripeError?.type,
+            statusCode: stripeError?.statusCode
+          }
+        },
         { status: 500 }
       );
     }
