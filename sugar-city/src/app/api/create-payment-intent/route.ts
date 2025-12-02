@@ -15,9 +15,18 @@ function getStripe(): Stripe {
     if (!env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
-    stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      typescript: true,
-    });
+    // Validate Stripe key format
+    if (!env.STRIPE_SECRET_KEY.startsWith('sk_')) {
+      throw new Error('Invalid STRIPE_SECRET_KEY format. Must start with sk_test_ or sk_live_');
+    }
+    try {
+      stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+        typescript: true,
+        apiVersion: '2024-12-18.acacia',
+      });
+    } catch (error) {
+      throw new Error(`Failed to initialize Stripe: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
   return stripe;
 }
@@ -172,13 +181,16 @@ export async function POST(request: NextRequest) {
       stripeInstance = getStripe();
     } catch (stripeError) {
       log.error('Stripe initialization failed', stripeError);
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Payment service unavailable';
       return NextResponse.json(
-        { success: false, error: 'Payment service unavailable', code: 'STRIPE_ERROR' },
+        { success: false, error: errorMessage, code: 'STRIPE_INIT_ERROR' },
         { status: 500 }
       );
     }
 
-    const paymentIntent = await stripeInstance.paymentIntents.create({
+    let paymentIntent;
+    try {
+      paymentIntent = await stripeInstance.paymentIntents.create({
       amount: amountInCents,
       currency: currency || 'usd',
       automatic_payment_methods: { enabled: true },
@@ -191,6 +203,14 @@ export async function POST(request: NextRequest) {
         subtotal: subtotal.toString()
       }
     });
+    } catch (stripeError: any) {
+      log.error('Stripe PaymentIntent creation failed', stripeError);
+      const errorMessage = stripeError?.message || 'Failed to create payment intent';
+      return NextResponse.json(
+        { success: false, error: errorMessage, code: 'STRIPE_PAYMENT_ERROR', details: stripeError?.type },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
