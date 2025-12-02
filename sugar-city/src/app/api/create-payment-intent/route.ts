@@ -15,12 +15,15 @@ function getStripe(): Stripe {
     if (!env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
-    // Validate Stripe key format
-    if (!env.STRIPE_SECRET_KEY.startsWith('sk_')) {
-      throw new Error('Invalid STRIPE_SECRET_KEY format. Must start with sk_test_ or sk_live_');
+    
+    // Trim whitespace and validate format
+    const secretKey = env.STRIPE_SECRET_KEY.trim();
+    if (!secretKey.startsWith('sk_test_') && !secretKey.startsWith('sk_live_')) {
+      throw new Error(`Invalid STRIPE_SECRET_KEY format. Must start with sk_test_ or sk_live_. Got: ${secretKey.substring(0, 10)}...`);
     }
+    
     try {
-      stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+      stripe = new Stripe(secretKey, {
         typescript: true,
         maxNetworkRetries: 2,
         timeout: 30000, // 30 second timeout

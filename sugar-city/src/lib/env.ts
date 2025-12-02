@@ -61,7 +61,7 @@ export const env = createEnv({
     runtimeEnv: {
         // Server
         CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY?.trim(),
         STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
         ADMIN_API_KEY: process.env.ADMIN_API_KEY,
         FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
