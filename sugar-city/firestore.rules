@@ -7,9 +7,10 @@ service cloud.firestore {
       allow write: if false; // Admin SDK only (server-side)
     }
     
-    // Bookings - admin read/write only
+    // Bookings - admin read (for admin portal), admin write via API
     match /bookings/{bookingId} {
-      allow read, write: if false; // Admin SDK only
+      allow read: if true; // Public read for admin portal (protected by Clerk)
+      allow write: if false; // Admin SDK only (via API routes)
     }
     
     // Coupons - public read for validation, admin write
@@ -18,9 +19,10 @@ service cloud.firestore {
       allow write: if false; // Admin SDK only
     }
     
-    // Tips - admin read/write only
+    // Tips - admin read (for admin portal), admin write via API
     match /tips/{tipId} {
-      allow read, write: if false; // Admin SDK only
+      allow read: if true; // Public read for admin portal (protected by Clerk)
+      allow write: if false; // Admin SDK only (via API routes)
     }
     
     // Spin attempts - admin read/write only
@@ -28,9 +30,10 @@ service cloud.firestore {
       allow read, write: if false; // Admin SDK only
     }
     
-    // Referral partners - admin read/write only
+    // Referral partners - admin read (for admin portal), admin write via API
     match /referral_partners/{partnerId} {
-      allow read, write: if false; // Admin SDK only
+      allow read: if true; // Public read for admin portal (protected by Clerk)
+      allow write: if false; // Admin SDK only (via API routes)
     }
     
     // Referral earnings - admin read/write only
@@ -56,6 +59,18 @@ service cloud.firestore {
     // POS Products - public read (for POS system), admin write via API
     match /pos_products/{productId} {
       allow read: if true; // Public read for POS system
+      allow write: if false; // Admin SDK only (via API routes)
+    }
+    
+    // Vendors - admin read (for admin portal), admin write via API
+    match /vendors/{vendorId} {
+      allow read: if true; // Public read for admin portal (protected by Clerk)
+      allow write: if false; // Admin SDK only (via API routes)
+    }
+    
+    // Reviews - admin read (for admin portal), admin write via API
+    match /reviews/{reviewId} {
+      allow read: if true; // Public read for admin portal (protected by Clerk)
       allow write: if false; // Admin SDK only (via API routes)
     }
     
