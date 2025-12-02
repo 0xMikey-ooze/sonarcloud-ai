@@ -1,23 +1,35 @@
 # 🔄 Git Repository Structure
 
-## ⚠️ IMPORTANT: Two Separate Git Repositories
+## ⚠️ IMPORTANT: ONE Git Repository, TWO Vercel Projects
 
-Sugar City Express uses **TWO SEPARATE Git repositories** for the booking site and admin portal:
+Sugar City Express uses **ONE Git repository** with **TWO separate Vercel projects**:
 
-### 1. **Booking Website Repository**
+### **Single Git Repository**
 - **Location**: Root directory (`/Users/baptistefam/sugar-city`)
-- **Git Remote**: `https://github.com/0xMikey-ooze/morningminis.git`
-- **Vercel Project**: `booking`
-- **Contains**: Main booking website code
+- **Git Remote**: Check with `git remote -v` in root directory
+- **Contains**: Both booking website AND admin portal code
 
-**When to push here:**
-- Changes to root directory files
-- Changes to `src/` directory (main app)
-- Changes to `public/` directory
-- Changes to `firestore.rules`
-- Changes to root `package.json`, `next.config.mjs`, etc.
+### **Two Vercel Projects**
 
-**Commands:**
+1. **`booking`** - Main booking website
+   - Deploys from: Root directory (`/`)
+   - Vercel watches the same git repo
+   - Auto-deploys when changes are pushed to root files
+
+2. **`admin-portal`** - Admin dashboard
+   - Deploys from: `/admin-portal` subdirectory
+   - Vercel watches the same git repo
+   - Auto-deploys when changes are pushed to admin-portal files
+
+### **How It Works**
+
+- **All changes go to ONE git repository** (root directory)
+- Vercel automatically detects which files changed
+- If root files change → `booking` project deploys
+- If admin-portal files change → `admin-portal` project deploys
+- If both change → both projects deploy
+
+**Commands (always from root):**
 ```bash
 cd /Users/baptistefam/sugar-city
 git add .
@@ -25,65 +37,50 @@ git commit -m "Your message"
 git push origin main
 ```
 
-### 2. **Admin Portal Repository**
-- **Location**: Admin portal directory (`/Users/baptistefam/sugar-city/admin-portal`)
-- **Git Remote**: `https://github.com/0xMikey-ooze/pos-product-grid.git`
-- **Vercel Project**: `admin-portal`
-- **Contains**: Admin portal code only
+**Vercel automatically handles the rest!**
 
-**When to push here:**
-- Changes to `admin-portal/src/` directory
-- Changes to `admin-portal/package.json`
-- Changes to `admin-portal/next.config.ts`
-- Changes to `admin-portal/vercel.json`
-- Any admin portal specific files
+## 🚨 Important Notes
 
-**Commands:**
-```bash
-cd /Users/baptistefam/sugar-city/admin-portal
-git add .
-git commit -m "Your message"
-git push origin main
-```
+1. **✅ DO**: Always commit from the root directory
+2. **✅ DO**: Include all changes (booking + admin portal) in the same commit
+3. **✅ DO**: Push once - Vercel handles both deployments automatically
+4. **❌ DON'T**: Try to push from admin-portal directory (it's not a separate repo)
+5. **❌ DON'T**: Set up separate git remotes for admin-portal
 
-## 🚨 Common Mistakes to Avoid
+## 🔍 How to Verify
 
-1. **❌ DON'T**: Push admin portal changes from root directory
-2. **❌ DON'T**: Push booking site changes from admin-portal directory
-3. **❌ DON'T**: Mix commits between the two repositories
-4. **✅ DO**: Always check which directory you're in before committing
-5. **✅ DO**: Use separate commits for booking vs admin portal changes
-
-## 🔍 How to Verify You're in the Right Repository
-
-### Check Booking Repository:
+### Check Git Repository:
 ```bash
 cd /Users/baptistefam/sugar-city
 git remote -v
-# Should show: origin -> https://github.com/0xMikey-ooze/morningminis.git
+# Should show your single git repository
 ```
 
-### Check Admin Portal Repository:
+### Check Vercel Projects:
 ```bash
-cd /Users/baptistefam/sugar-city/admin-portal
-git remote -v
-# Should show: origin -> https://github.com/0xMikey-ooze/pos-product-grid.git
+# Check which Vercel project is linked in root
+cat .vercel/project.json
+
+# Check which Vercel project is linked in admin-portal
+cat admin-portal/.vercel/project.json
 ```
 
 ## 📝 Workflow Examples
 
 ### Example 1: Fixing Products Save Issue (Admin Portal)
 ```bash
-# 1. Navigate to admin portal
-cd /Users/baptistefam/sugar-city/admin-portal
+# 1. Navigate to root directory (always!)
+cd /Users/baptistefam/sugar-city
 
 # 2. Make changes to admin portal files
-# ... edit files ...
+# ... edit admin-portal/src/app/pos/products/page.tsx ...
 
-# 3. Commit and push to admin portal repo
-git add src/app/pos/products/page.tsx
+# 3. Commit and push (from root)
+git add admin-portal/src/app/pos/products/page.tsx
 git commit -m "Fix products save: Use API routes"
 git push origin main
+
+# 4. Vercel automatically deploys admin-portal project
 ```
 
 ### Example 2: Updating Booking Page Images (Booking Site)
@@ -92,15 +89,17 @@ git push origin main
 cd /Users/baptistefam/sugar-city
 
 # 2. Make changes to booking site
-# ... edit files ...
+# ... edit src/app/book/BookingPageClient.tsx public/booking-hero.png ...
 
-# 3. Commit and push to booking repo
+# 3. Commit and push (from root)
 git add src/app/book/BookingPageClient.tsx public/booking-hero.png
 git commit -m "Update booking page images"
 git push origin main
+
+# 4. Vercel automatically deploys booking project
 ```
 
-### Example 3: Updating Firestore Rules (Booking Site)
+### Example 3: Updating Firestore Rules
 ```bash
 # 1. Navigate to root directory (rules are in root)
 cd /Users/baptistefam/sugar-city
@@ -108,29 +107,46 @@ cd /Users/baptistefam/sugar-city
 # 2. Update rules
 # ... edit firestore.rules ...
 
-# 3. Commit and push to booking repo
+# 3. Commit and push (from root)
 git add firestore.rules
 git commit -m "Add read access for admin collections"
 git push origin main
 
-# 4. Deploy rules separately
+# 4. Deploy rules separately (not via Vercel)
 firebase deploy --only firestore:rules
+```
+
+### Example 4: Making Changes to Both Projects
+```bash
+# 1. Navigate to root directory
+cd /Users/baptistefam/sugar-city
+
+# 2. Make changes to both booking and admin portal
+# ... edit files in both ...
+
+# 3. Commit everything together (from root)
+git add .
+git commit -m "Update booking page and fix admin portal products"
+git push origin main
+
+# 4. Vercel automatically deploys BOTH projects
 ```
 
 ## 🎯 Quick Reference
 
-| What Changed | Repository | Directory | Command |
-|-------------|-----------|-----------|---------|
-| Booking page | `morningminis` | `/` | `cd /Users/baptistefam/sugar-city && git push` |
-| Admin portal | `pos-product-grid` | `/admin-portal` | `cd /Users/baptistefam/sugar-city/admin-portal && git push` |
-| Firestore rules | `morningminis` | `/` | `cd /Users/baptistefam/sugar-city && git push` |
-| Root config files | `morningminis` | `/` | `cd /Users/baptistefam/sugar-city && git push` |
-| Admin config files | `pos-product-grid` | `/admin-portal` | `cd /Users/baptistefam/sugar-city/admin-portal && git push` |
+| What Changed | Vercel Project | Git Command (always from root) |
+|-------------|----------------|-------------------------------|
+| Booking page files | `booking` | `cd /Users/baptistefam/sugar-city && git add src/... && git commit && git push` |
+| Admin portal files | `admin-portal` | `cd /Users/baptistefam/sugar-city && git add admin-portal/... && git commit && git push` |
+| Firestore rules | Both (shared) | `cd /Users/baptistefam/sugar-city && git add firestore.rules && git commit && git push` |
+| Root config files | `booking` | `cd /Users/baptistefam/sugar-city && git add package.json && git commit && git push` |
+| Admin config files | `admin-portal` | `cd /Users/baptistefam/sugar-city && git add admin-portal/package.json && git commit && git push` |
 
 ## ✅ Before Every Push
 
-1. **Check current directory**: `pwd`
-2. **Check git remote**: `git remote -v`
+1. **Always be in root directory**: `cd /Users/baptistefam/sugar-city`
+2. **Check git remote**: `git remote -v` (should show ONE repository)
 3. **Check what files changed**: `git status`
-4. **Verify you're pushing to the right repo**: Match the remote URL above
+4. **Push once**: `git push origin main`
+5. **Vercel handles both deployments automatically**
 
