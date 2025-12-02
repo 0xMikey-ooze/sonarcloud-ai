@@ -49,7 +49,16 @@ export async function POST(request: NextRequest) {
     const { tourId, adultPax, childPax, couponCode, currency } = validation.data;
 
     // 1. Fetch Tour Price from Firestore (using admin SDK)
-    const adminDb = getAdminDb();
+    let adminDb;
+    try {
+      adminDb = getAdminDb();
+    } catch (firebaseError) {
+      log.error('Firebase Admin initialization failed', firebaseError);
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed', code: 'DATABASE_ERROR' },
+        { status: 500 }
+      );
+    }
     const tourRef = adminDb.collection('tours').doc(tourId);
     const tourSnap = await tourRef.get();
 
@@ -158,7 +167,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Create PaymentIntent
-    const paymentIntent = await getStripe().paymentIntents.create({
+    let stripeInstance;
+    try {
+      stripeInstance = getStripe();
+    } catch (stripeError) {
+      log.error('Stripe initialization failed', stripeError);
+      return NextResponse.json(
+        { success: false, error: 'Payment service unavailable', code: 'STRIPE_ERROR' },
+        { status: 500 }
+      );
+    }
+
+    const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: amountInCents,
       currency: currency || 'usd',
       automatic_payment_methods: { enabled: true },
