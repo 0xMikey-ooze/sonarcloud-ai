@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
+    "start:prod": "node dist/server.js",
     "serve": "ts-node src/server.ts",
     "ingest": "ts-node src/scripts/ingest_intercom.ts",
     "build": "tsc"

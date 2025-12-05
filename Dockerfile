@@ -12,9 +12,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/data ./src/data
-# Copy env file if needed, but secrets should be injected by Render environment
-# COPY .env .env 
+# Copy data to dist/data so the server can find it relative to execution path
+COPY --from=builder /app/src/data ./dist/data
 
 EXPOSE 3000
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "start:prod"]
