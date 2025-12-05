@@ -1,5 +1,4 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { z } from "zod";
 import * as fs from 'fs';
@@ -8,6 +7,18 @@ import { RagService } from './services/rag';
 import { SupportAgent } from './agent';
 import { ActionRunner } from './runner';
 import { IncomingMessage } from "./types";
+
+// Define schemas outside to avoid type inference issues
+const QueryKBSchema = {
+    query: z.string()
+};
+
+const CreateTaskSchema = {
+    issue: z.string().describe("The full description of the customer issue"),
+    customer_name: z.string().optional(),
+    customer_email: z.string().optional(),
+    school_name: z.string().optional()
+};
 
 export class SonarAgentMCP {
     private server: McpServer;
@@ -30,13 +41,20 @@ export class SonarAgentMCP {
     }
 
     private setupTools() {
+        const ragService = this.ragService;
+        const agent = this.agent;
+        const runner = this.runner;
+        
+        // Cast to any to bypass MCP SDK's overly complex type inference
+        const server = this.server as any;
+
         // Tool: Query Knowledge Base (RAG)
-        this.server.tool(
+        server.tool(
             "query_knowledge_base",
             "Search the SonarCloud support knowledge base and past issues.",
-            { query: z.string() },
-            async ({ query }) => {
-                const results = this.ragService.search(query);
+            QueryKBSchema,
+            async ({ query }: { query: string }) => {
+                const results = ragService.search(query);
                 return {
                     content: [{ type: "text", text: results.length > 0 ? results.join("\n\n") : "No matches found." }]
                 };
@@ -44,17 +62,11 @@ export class SonarAgentMCP {
         );
 
         // Tool: Create Support Task / Handle Issue
-        this.server.tool(
+        server.tool(
             "create_support_task",
             "Process a support issue: analyzes it, creates a Notion task, and drafts an email.",
-            {
-                issue: z.string().describe("The full description of the customer issue"),
-                customer_name: z.string().optional(),
-                customer_email: z.string().optional(),
-                school_name: z.string().optional()
-            },
-            async ({ issue, customer_name, customer_email, school_name }) => {
-                // Mock an IncomingMessage from the tool input
+            CreateTaskSchema,
+            async ({ issue, customer_name, customer_email, school_name }: { issue: string; customer_name?: string; customer_email?: string; school_name?: string }) => {
                 const message: IncomingMessage = {
                     message_body: issue,
                     customer_name: customer_name || "MCP User",
@@ -65,8 +77,8 @@ export class SonarAgentMCP {
                     customer_history: null
                 };
 
-                const output = await this.agent.processMessage(message);
-                await this.runner.run(output);
+                const output = await agent.processMessage(message);
+                await runner.run(output);
 
                 return {
                     content: [{
@@ -84,7 +96,7 @@ export class SonarAgentMCP {
             "history",
             "history://latest",
             async (uri) => {
-                const dataPath = path.join(__dirname, '../data/history.json');
+                const dataPath = path.join(__dirname, 'data/history.json');
                 const rawData = fs.readFileSync(dataPath, 'utf-8');
                 return {
                     contents: [{
