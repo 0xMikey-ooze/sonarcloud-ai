@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+# Give Node more memory for TypeScript compilation (googleapis types are huge)
+RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
 # Production Stage
 FROM node:18-alpine
