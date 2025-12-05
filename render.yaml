@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: sonarcloud-ai
+    env: docker
+    plan: free
+    branch: main
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: NOTION_API_KEY
+        sync: false
+      - key: NOTION_DATABASE_ID
+        sync: false
+      - key: INTERCOM_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+    autoDeploy: true

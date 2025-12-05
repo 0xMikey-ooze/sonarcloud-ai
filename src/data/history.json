@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "issue": "Speakers making buzzing noise in the cafeteria.",
+    "solution": "Ground loop detected. We installed a ground loop isolator on the audio input cable to the amplifier in the cafeteria rack. Buzzing stopped immediately."
+  },
+  {
+    "id": "2",
+    "issue": "Bells are ringing 5 minutes late.",
+    "solution": "NTP server configuration was incorrect on the master clock. Updated to pool.ntp.org and forced a sync. Time is now accurate."
+  },
+  {
+    "id": "3",
+    "issue": "Cannot log in to the admin panel with default credentials.",
+    "solution": "The default admin account was locked out due to too many failed attempts. We reset the password via the physical reset button on the back of the control unit (held for 10s)."
+  },
+  {
+    "id": "4",
+    "issue": "Microphone volume too low during live announcements.",
+    "solution": "Adjusted the 'Mic Gain' setting in the Zone Controller web interface from 20% to 65%. Also instructed user to hold mic closer."
+  },
+  {
+    "id": "5",
+    "issue": "Zone 4 is completely silent.",
+    "solution": "Found a loose speaker wire at the terminal block on the amplifier for Zone 4. Re-terminated the wire and secured the connection."
+  },
+  {
+    "id": "intercom_101",
+    "issue": "How do I change the bell schedule for exam week?",
+    "solution": "You can create a 'Special Schedule' in the Calendar tab. Go to Calendar > Special Schedules > Add New, set the dates, and define the bell times."
+  },
+  {
+    "id": "intercom_102",
+    "issue": "The mobile app keeps logging me out.",
+    "solution": "We released a patch for this in v2.4.1. Please update the SonarCloud app from the App Store or Play Store."
+  },
+  {
+    "id": "intercom_103",
+    "issue": "Can we integrate SonarCloud with PowerSchool?",
+    "solution": "Yes, we support SIS sync with PowerSchool via OneRoster API. Please reach out to your account manager to enable this feature."
+  }
+]
