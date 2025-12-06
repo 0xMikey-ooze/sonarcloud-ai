@@ -102,7 +102,7 @@ Available tools:
 
     try {
       const msg = await this.anthropic.messages.create({
-        model: "claude-3-opus-20240229",
+        model: "claude-opus-4-20250514",
         max_tokens: 4096,
         system: systemPrompt,
         messages: [

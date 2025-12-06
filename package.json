@@ -10,6 +10,7 @@
     "serve": "node --max-old-space-size=460 dist/server.js",
     "serve:dev": "ts-node src/server.ts",
     "ingest": "ts-node src/scripts/ingest_intercom.ts",
+    "process-conversations": "node --max-old-space-size=1024 dist/scripts/process_all_conversations.js",
     "build": "tsc && npm run copy-data",
     "copy-data": "mkdir -p dist/data && cp -r src/data/* dist/data/"
   },

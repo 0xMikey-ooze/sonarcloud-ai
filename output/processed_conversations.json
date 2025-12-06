@@ -1,0 +1,242 @@
+[
+  {
+    "id": "215472124096481",
+    "created_at": "2025-12-04T15:49:51.000Z",
+    "customer_name": "Jessica heintz",
+    "customer_email": "jheintz@girardcollege.edu",
+    "original_message": "Hi!  It's been awhile.  We are still having some issues hearing bells in a few rooms",
+    "ai_analysis": {
+      "category": "Audio Issue",
+      "priority": "Medium",
+      "sentiment": "Neutral",
+      "summary": "Customer reports that bells are not audible in some rooms, likely a recurring issue.",
+      "school_name": "Girard College",
+      "is_repeat_issue": true,
+      "requires_escalation": false,
+      "escalation_reason": null
+    },
+    "ai_response": "Hi Jessica,\n\nThanks for reaching out about the ongoing bell audibility issues at Girard College. I apologize for the persistent trouble with this.\n\nTo better assist, could you please provide some additional details:\n- Which specific rooms are having trouble hearing the bells?\n- Is it an issue of volume, clarity, or both?\n- Are the issues consistent or intermittent?\n- Have there been any recent changes to room layouts or usage?\n\nI've logged this with our support team for further investigation. We'll review prior adjustments to see if a different approach is needed.\n\nIn the meantime, you can try manually triggering bells for the affected zones from the admin panel. Go to Notifications > Bells, select the relevant zone, and click 'Play Now'. This can help determine if it's a scheduling or hardware issue.\n\nPlease let me know if you have any other questions. We're committed to resolving this for you.\n\nBest regards,\n[Your Name]\nSonarCloud Support",
+    "should_respond": true,
+    "age_days": 1
+  },
+  {
+    "id": "215472139415059",
+    "created_at": "2025-12-05T15:10:35.000Z",
+    "customer_name": "Neena Phillips",
+    "customer_email": "neenaphillips@newdesignhigh.com",
+    "original_message": "Hi, our bells are still not working.",
+    "ai_analysis": {
+      "category": "Bell System Failure",
+      "priority": "High",
+      "sentiment": "Neutral",
+      "summary": "Customer reports bells are still not working, implying a previously reported issue that has not been resolved.",
+      "school_name": null,
+      "is_repeat_issue": true,
+      "requires_escalation": true,
+      "escalation_reason": "Repeat issue, insufficient context to troubleshoot"
+    },
+    "ai_response": "Hi Neena,\n\nI apologize for the continued trouble with your bell system. To better assist, can you please provide the name of your school? I want to review the history of this issue to determine the best course of action.\n\nRest assured, I have escalated this to our senior support team led by Roman and JBaptiste. They will be reviewing as a high priority and will reach out shortly to gather more details and work towards a resolution.\n\nWe understand the critical role the bells play in your daily operations, and we are committed to getting this resolved for you as quickly as possible. \n\nPlease don't hesitate to provide any additional context that may assist in our troubleshooting.\n\nBest regards,\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 0
+  },
+  {
+    "id": "215472140772318",
+    "created_at": "2025-12-05T16:45:12.000Z",
+    "customer_name": "Jordan Land",
+    "customer_email": "jland@schools.nyc.gov",
+    "original_message": "Bells went down again",
+    "ai_analysis": {
+      "category": "Bells",
+      "priority": "High",
+      "sentiment": "Frustrated",
+      "summary": "School bells are not working despite customer attempting usual fix.",
+      "school_name": null,
+      "is_repeat_issue": true,
+      "requires_escalation": true,
+      "escalation_reason": "Repeat issue not solved by standard troubleshooting"
+    },
+    "ai_response": "Hi Jordan,\n\nI'm sorry to hear the bells are down again and the usual fix did not resolve it. Since this is a repeat issue, I have escalated it to our senior support team for further investigation.\n\nOur senior engineers Roman and JBaptiste have been notified and will be looking into this as a high priority. They will reach out directly if any additional information is needed.\n\nIn the meantime, please let me know if there is anything else I can assist with.\n\nBest regards,\n[Your Name]\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 0
+  },
+  {
+    "id": "215472137067474",
+    "created_at": "2025-12-05T12:33:24.000Z",
+    "customer_name": "Marybeth Peterman",
+    "customer_email": "mpeterman@schools.nyc.gov",
+    "original_message": "Please send me the link again.      Thank you!     Ms. Marybeth Peterman MS 577  6th Grade ELA Teacher​ &amp; Advisor (718) 486-6211",
+    "ai_analysis": {
+      "category": "Account Access",
+      "priority": "Medium",
+      "sentiment": "Neutral",
+      "summary": "Customer is requesting a link to be resent, likely related to account access.",
+      "school_name": "MS 577 (inferred from email signature)",
+      "is_repeat_issue": false,
+      "requires_escalation": false,
+      "escalation_reason": null
+    },
+    "ai_response": "Hi Ms. Peterman,\n\nNo problem, I'd be happy to resend your SonarCloud account access link. You should receive an email shortly with a link to set your password and log in.\n\nPlease let me know if you have any other questions! We're excited to support MS 577 this school year.\n\nBest,\n[Your Name]\nSonarCloud Support",
+    "should_respond": true,
+    "age_days": 0
+  },
+  {
+    "id": "215472110971586",
+    "created_at": "2025-12-03T17:04:19.000Z",
+    "customer_name": "Christopher Thompson",
+    "customer_email": "cthompson32@schools.nyc.gov",
+    "original_message": "We have no bells for the last 2 days please advise",
+    "ai_analysis": {
+      "category": "Hardware/Audio",
+      "priority": "High",
+      "sentiment": "Frustrated",
+      "summary": "No bell sounds for the past 2-3 days at an unknown NYC school.",
+      "school_name": null,
+      "is_repeat_issue": true,
+      "requires_escalation": true,
+      "escalation_reason": "Repeat issue, insufficient information to troubleshoot"
+    },
+    "ai_response": "Hi Christopher,\n\nThank you for reporting the issue with your school's bell system. I apologize for the continued disruption to your schedule.\n\nDue to the urgent nature of this problem, I have escalated your case to our senior support team, including Roman and JBaptiste, our lead engineers. They will work to identify the root cause and resolve this for you as quickly as possible.\n\nTo assist in our investigation, could you please provide the name of your school? This will allow us to locate your account and system configuration details.\n\nWe appreciate your patience as we work to get your bells operational again. Please let me know if you have any other questions in the meantime.\n\nBest regards,\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 2
+  },
+  {
+    "id": "215472137483841",
+    "created_at": "2025-12-05T13:13:34.000Z",
+    "customer_name": "Victor Villanueva",
+    "customer_email": "vvillanueva2@schools.nyc.gov",
+    "original_message": "Hi Jesse if you have a time to speak to the AP Middle school regarding Sonarcloud",
+    "ai_analysis": {
+      "category": "Sales Inquiry",
+      "priority": "Medium",
+      "sentiment": "Neutral",
+      "summary": "Customer requesting a call with AP Middle school regarding SonarCloud",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": true,
+      "escalation_reason": "Sales inquiry - should be handled by account manager"
+    },
+    "ai_response": "Hi Victor,\n\nThank you for your interest in SonarCloud for your middle school. I've notified our account management team of your request for a call. One of our account executives who specializes in your district will reach out shortly to schedule a convenient time to discuss how SonarCloud can benefit your school.\n\nPlease let me know if there's anything else I can assist with in the meantime.\n\nBest regards,\nJesse Baptiste\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 0
+  },
+  {
+    "id": "215472134894955",
+    "created_at": "2025-12-05T09:28:55.000Z",
+    "customer_name": "Barbara Andujar",
+    "customer_email": "banduja@schools.nyc.gov",
+    "original_message": "Good morning,  I confirmed the outlook invite you sent. Can we speak?    We paid for this service and the unit isnt working. Thia has been an ongoing issue i wish to have someone help us to fix this issue please.      Thank you.   Get Outlook for iOS",
+    "ai_analysis": {
+      "category": "Hardware Issue",
+      "priority": "High",
+      "sentiment": "Frustrated",
+      "summary": "Customer's unit is not working despite having paid for the service. This is an ongoing issue that needs to be resolved.",
+      "school_name": null,
+      "is_repeat_issue": true,
+      "requires_escalation": true,
+      "escalation_reason": "Repeat issue not resolved, customer requesting to speak to someone directly"
+    },
+    "ai_response": "Dear Barbara,\n\nThank you for reaching out regarding the ongoing issues with your SonarCloud unit. I sincerely apologize for the trouble this has caused.\n\nI have escalated this to our senior support management, Roman and JBaptiste, who will be contacting you directly to set up a call. They will work with you personally to get to the bottom of this and make sure your system is fully functional as quickly as possible.\n\nIn the meantime, could you please provide some additional details that will help in our troubleshooting:\n- What specific symptoms are you seeing with the unit? \n- Has anything changed with the system setup recently?\n- Are there any error messages displayed on the unit or in the admin portal?\n\nAny additional context you can share will help us resolve this faster. Roman or JBaptiste will be in touch very shortly to set up a meeting.\n\nThank you for your patience and understanding,\n[Your Name]\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 0
+  },
+  {
+    "id": "215472123171663",
+    "created_at": "2025-12-04T14:35:34.000Z",
+    "customer_name": "Marybeth Peterman",
+    "customer_email": "mpeterman@schools.nyc.gov",
+    "original_message": "Thank you!     Ms. Marybeth Peterman MS 577  6th Grade ELA Teacher​ &amp; Advisor (718) 486-6211",
+    "ai_analysis": {
+      "category": "General Inquiry",
+      "priority": "Low",
+      "sentiment": "Neutral",
+      "summary": "The customer simply said 'Thank you' and provided their contact information. No specific issue or request.",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": false,
+      "escalation_reason": null
+    },
+    "ai_response": "Hi Ms. Peterman,\n\nThank you for your message. I wanted to follow up to see if there is anything our team at SonarCloud can assist you with. Please let us know if you have any questions about our products or services.\n\nWe appreciate you taking the time to provide your contact information. Don't hesitate to reach out if there is anything we can help with in the future.\n\nBest regards,\n[Your Name]\nSonarCloud Support",
+    "should_respond": true,
+    "age_days": 1
+  },
+  {
+    "id": "215472097205072",
+    "created_at": "2025-12-03T16:34:18.000Z",
+    "customer_name": "Jennifer Lana Etzel",
+    "customer_email": "jlanaet@schools.nyc.gov",
+    "original_message": "Hi Jennifer,\nToday marks the end of our Women’s History Month journey. I want to take a moment to express my sincere thanks for your incredible support throughout this period. Your enthusiasm and participation have been the heartbeat of this series.\nThe feedback has been truly inspiring. Hearing how these stories have honed our students' active listening and added a spark to their days is a joy. It’s clear that we’ve done more than just share history; we’ve ignited curiosity and respect for the incredible women who've shaped our world.\nWhile today was our last episode for now, the journey doesn’t end here. Next month, we're diving into Mental Health Awareness, continuing our commitment to enriching our students' lives and perspectives.\nThank you for being such a vital part of this experience. Your support makes all the difference, and I can’t wait to explore new topics with you soon.\nWarmest regards,\nJesse",
+    "ai_analysis": {
+      "category": "Feedback",
+      "priority": "Low",
+      "sentiment": "Positive",
+      "summary": "Jennifer expresses gratitude for the support during Women's History Month and enthusiasm for the upcoming Mental Health Awareness series. She conveys appreciation for the impact the series had on students.",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": false,
+      "escalation_reason": null
+    },
+    "ai_response": "Dear Jennifer,\n\nThank you so much for your heartwarming message. It's an absolute joy to hear that the Women's History Month series resonated with you and your students. Igniting curiosity and respect was our exact aim, and your feedback affirms that we achieved that.\n\nYour support and enthusiasm are what make these programs truly impactful. We deeply appreciate your partnership in enriching your students' perspectives.\n\nWe can't wait to bring the same energy and purpose to the upcoming Mental Health Awareness series. Your students are in for another meaningful journey.\n\nThank you again for your kind words and continued support. It's educators like you who make all the difference.\n\nWarmest regards,\nJesse",
+    "should_respond": true,
+    "age_days": 2
+  },
+  {
+    "id": "215472106527983",
+    "created_at": "2025-12-03T12:31:40.000Z",
+    "customer_name": "Victor Villanueva",
+    "customer_email": "vvillanueva2@schools.nyc.gov",
+    "original_message": "Hi jesse   middile school is interested of sonarcloud can you come and vist our school and iI will ntroduce you  to the M.S. asst principal.",
+    "ai_analysis": {
+      "category": "Sales Inquiry",
+      "priority": "High",
+      "sentiment": "Positive",
+      "summary": "Potential customer from a middle school in NYC is interested in SonarCloud and wants a representative to visit and meet with the assistant principal.",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": true,
+      "escalation_reason": "New sales opportunity requiring in-person visit"
+    },
+    "ai_response": "Hi Victor,\n\nThank you for your interest in SonarCloud for your middle school! We would be happy to arrange a visit to demonstrate our solution and meet with your assistant principal.\n\nTo get the process started, could you please provide:\n1. The name of your middle school \n2. The best contact number and email for the assistant principal\n3. Some potential dates and times that would work well for a visit\n\nI've notified our sales director Roman, who will be in touch shortly to coordinate the details. We look forward to the opportunity to serve your school!\n\nBest regards,\nJesse\nSonarCloud Support\n\nPS: In the meantime, feel free to browse our solutions for K-12 schools at https://www.sonarcloud.io/schools",
+    "should_respond": false,
+    "age_days": 2
+  },
+  {
+    "id": "215472086060597",
+    "created_at": "2025-12-02T14:11:19.000Z",
+    "customer_name": "Richard Wu",
+    "customer_email": "richardwu@newdesignhigh.com",
+    "original_message": "Good morning! Our bell system seems to be down. We have tried rebooting the device and it is still not working",
+    "ai_analysis": {
+      "category": "No Audio Output",
+      "priority": "High",
+      "sentiment": "Neutral",
+      "summary": "Bell system is down at a school, rebooting the device did not resolve the issue.",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": true,
+      "escalation_reason": "Insufficient information to fully troubleshoot - need to identify the school and gather more details about the issue and troubleshooting steps already taken."
+    },
+    "ai_response": "Hello Richard,\n\nThank you for reporting the issue with your bell system. I apologize for the disruption this is causing.\n\nTo help us investigate and resolve this as quickly as possible, could you please provide some additional details:\n\n1. What is the name of your school? (So we can look up your specific configuration)\n2. When did you first notice the issue, and have the bells worked at all since then?\n3. Besides rebooting, have you tried any other troubleshooting steps?\n4. Are other SonarCloud features like announcements working?\n\nI've escalated this to our senior support team, including our Head of Support Roman Walters. They will be actively investigating and will reach out if any other info is needed.\n\nWe understand the importance of having the bells working properly. Rest assured this is our top priority and we will keep you updated.\n\nBest regards,\nAI Support Agent\nSonarCloud",
+    "should_respond": false,
+    "age_days": 3
+  },
+  {
+    "id": "215472083185927",
+    "created_at": "2025-12-02T12:14:31.000Z",
+    "customer_name": "Barbara Andujar",
+    "customer_email": "banduja@schools.nyc.gov",
+    "original_message": "Good morning,  The unit needs to be serviced and I would like to renew the subscription.   Thank you,  Ms. Andujar    Get Outlook for iOS",
+    "ai_analysis": {
+      "category": "Service/Subscription",
+      "priority": "Medium",
+      "sentiment": "Neutral",
+      "summary": "Customer Barbara Andujar is requesting service for a unit and renewal of their subscription.",
+      "school_name": null,
+      "is_repeat_issue": false,
+      "requires_escalation": true,
+      "escalation_reason": "Insufficient information to resolve request (unknown school, unit details, and subscription status)"
+    },
+    "ai_response": "Dear Ms. Andujar,\n\nThank you for contacting SonarCloud regarding servicing a unit and renewing your subscription.\n\nIn order to assist you further, we need some additional information:\n\n1. Which school location is this request for?\n2. Can you provide the model number or location of the unit needing service?\n3. For the subscription, please confirm the plan you would like to renew.\n\nI have notified our senior support team of your request and they will be in touch shortly to gather these details and process your requests.\n\nWe appreciate your business and look forward to resolving this for you quickly.\n\nBest regards,\nSonarCloud Support",
+    "should_respond": false,
+    "age_days": 3
+  }
+]
