@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "newsletter": {
+      "source": "openclaudia/openclaudia-skills",
+      "sourceType": "github",
+      "skillPath": "skills/newsletter/SKILL.md",
+      "computedHash": "8e17f1c47dfd51881f70e3428f4c8660f85e417ccba0f0df54f770caf7e70b0b"
+    }
+  }
+}

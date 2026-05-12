@@ -12,7 +12,8 @@
     "ingest": "ts-node src/scripts/ingest_intercom.ts",
     "process-conversations": "node --max-old-space-size=1024 dist/scripts/process_all_conversations.js",
     "build": "tsc && npm run copy-data",
-    "copy-data": "mkdir -p dist/data && cp -r src/data/* dist/data/"
+    "copy-data": "mkdir -p dist/data && cp -r src/data/* dist/data/",
+    "newsletter:send-premium": "ts-node src/newsletter/scripts/generate-and-send-premium.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,21 +21,29 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.1",
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "zod": "^3.24.0",
     "@notionhq/client": "^5.4.0",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.0.8",
     "@types/express": "^5.0.6",
     "@types/lunr": "^2.3.7",
     "axios": "^1.13.2",
     "body-parser": "^2.2.1",
     "dotenv": "^17.2.3",
+    "exa-js": "^2.12.1",
     "express": "^5.2.1",
     "googleapis": "^167.0.0",
-    "lunr": "^2.3.9"
+    "lunr": "^2.3.9",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "resend": "^6.12.3",
+    "zod": "^3.24.0"
   }
 }
