@@ -1,0 +1,42 @@
+{
+  "title": "How a CPU Works",
+  "hook": "From transistors to instructions in 30 seconds",
+  "format": "square",
+  "scenes": [
+    {
+      "index": 0,
+      "narration": "A CPU is the brain of your computer.",
+      "imagePrompt": "isometric illustration of a glowing CPU chip on a circuit board",
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1080",
+      "audioUrl": "",
+      "durationFrames": 90,
+      "captionWords": [
+        { "text": "A", "startMs": 0, "endMs": 200 },
+        { "text": "CPU", "startMs": 200, "endMs": 700 },
+        { "text": "is", "startMs": 700, "endMs": 900 },
+        { "text": "the", "startMs": 900, "endMs": 1100 },
+        { "text": "brain", "startMs": 1100, "endMs": 1700 },
+        { "text": "of", "startMs": 1700, "endMs": 1900 },
+        { "text": "your", "startMs": 1900, "endMs": 2200 },
+        { "text": "computer.", "startMs": 2200, "endMs": 3000 }
+      ]
+    },
+    {
+      "index": 1,
+      "narration": "It runs billions of instructions every second.",
+      "imagePrompt": "abstract data streams flowing through silicon, neon blue and orange",
+      "imageUrl": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1080",
+      "audioUrl": "",
+      "durationFrames": 105,
+      "captionWords": [
+        { "text": "It", "startMs": 0, "endMs": 250 },
+        { "text": "runs", "startMs": 250, "endMs": 700 },
+        { "text": "billions", "startMs": 700, "endMs": 1400 },
+        { "text": "of", "startMs": 1400, "endMs": 1600 },
+        { "text": "instructions", "startMs": 1600, "endMs": 2600 },
+        { "text": "every", "startMs": 2600, "endMs": 3000 },
+        { "text": "second.", "startMs": 3000, "endMs": 3500 }
+      ]
+    }
+  ]
+}
