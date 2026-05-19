@@ -1,0 +1,18 @@
+node_modules
+.next
+out
+.env.local
+.env*.local
+
+jobs/*
+!jobs/.gitkeep
+public/assets/*
+!public/assets/.gitkeep
+public/renders/*
+!public/renders/.gitkeep
+
+.DS_Store
+
+# Midjourney / browser login (sprite-only, never commit)
+.data/browser-midjourney/
+.data/midjourney-vnc/
