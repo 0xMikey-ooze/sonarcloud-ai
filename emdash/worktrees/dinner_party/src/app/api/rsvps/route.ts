@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { normalizeEmail } from "@/lib/utils"
 import { findExistingRsvp, getAvailableCapacity, expirePendingRsvps } from "@/lib/rsvp"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 import { v4 as uuidv4 } from "uuid"
 
 export async function POST(req: NextRequest) {
@@ -145,7 +145,7 @@ async function createPaidRsvp(
   const baseUrl = process.env.NEXTAUTH_URL!
   const idempotencyKey = uuidv4()
 
-  const session = await stripe.checkout.sessions.create(
+  const session = await getStripe().checkout.sessions.create(
     {
       mode: "payment",
       line_items: [

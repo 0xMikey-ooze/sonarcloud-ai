@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
-import { stripe } from "@/lib/stripe"
+import { getStripe } from "@/lib/stripe"
 import { logAudit } from "@/lib/audit"
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   }
 
   try {
-    await stripe.refunds.create({
+    await getStripe().refunds.create({
       payment_intent: payment.stripePaymentIntentId,
     })
   } catch {

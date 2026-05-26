@@ -50,3 +50,4 @@ prisma/test.db
 .agents/
 skills-lock.json
 openmemory.md
+emdash/
