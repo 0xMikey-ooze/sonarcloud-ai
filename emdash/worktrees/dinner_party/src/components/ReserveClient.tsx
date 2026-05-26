@@ -1,36 +1,102 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { NoiseCanvas } from "@/components/NoiseCanvas"
 import { NocturneHeader } from "@/components/NocturneHeader"
 
-const EVENT_YEAR = 2026
-const EVENT_MONTH = 7 // August (0-indexed)
-const EVENT_DAY = 15
+interface DinnerEvent {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  startsAt: string
+  timezone: string
+  capacity: number
+  priceCents: number
+  currency: string
+  priceDescription: string | null
+  paymentRequired: boolean
+  _count: { rsvps: number }
+}
 
-function buildCalendarDays(year: number, month: number) {
-  const firstDayOfWeek = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const days: (number | null)[] = []
-  for (let i = 0; i < firstDayOfWeek; i++) {
-    days.push(null)
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i)
-  }
-  return { days, daysInMonth }
+function formatCurrency(cents: number, currency: string = "usd"): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(cents / 100)
+}
+
+function formatDate(dateStr: string, tz: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: tz,
+    timeZoneName: "short",
+  }).format(new Date(dateStr))
 }
 
 export default function ReserveClient() {
-  const [selectedDay, setSelectedDay] = useState(EVENT_DAY)
+  const [dinner, setDinner] = useState<DinnerEvent | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
   const [partySize, setPartySize] = useState(1)
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const { days } = buildCalendarDays(EVENT_YEAR, EVENT_MONTH)
-  const availableDays = [EVENT_DAY]
-  const monthLabel = new Date(EVENT_YEAR, EVENT_MONTH).toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  })
+  useEffect(() => {
+    fetch("/api/rsvps?slug=summer-sunset")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.dinner) setDinner(data.dinner)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError("")
+    setSubmitting(true)
+
+    try {
+      const res = await fetch("/api/rsvps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dinnerPartyId: dinner!.id,
+          guestName: name.trim(),
+          guestEmail: email.trim(),
+          rsvpStatus: "attending",
+          partySize,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong")
+        setSubmitting(false)
+        return
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+        return
+      }
+
+      window.location.href = `/events/summer-sunset/success`
+    } catch {
+      setError("Network error. Please try again.")
+      setSubmitting(false)
+    }
+  }
+
+  const totalPrice = dinner ? dinner.priceCents * partySize : 0
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", backgroundColor: "var(--col-bg-main)" }}>
@@ -60,6 +126,7 @@ export default function ReserveClient() {
           paddingTop: "100px",
         }}
       >
+        {/* Left: Event details */}
         <div
           style={{
             width: "50%",
@@ -94,136 +161,92 @@ export default function ReserveClient() {
             are gone, they&apos;re gone. Secure your spot for the inaugural edition.
           </p>
 
-          <div style={{ marginBottom: "3vh" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "9px",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                marginBottom: "1vh",
-                opacity: 0.6,
-              }}
-            >
-              Party Size
-            </label>
-            <select
-              value={partySize}
-              onChange={(e) => setPartySize(Number(e.target.value))}
-              style={{
-                width: "100%",
-                maxWidth: "300px",
-                background: "transparent",
-                border: "none",
-                borderBottom: "1px solid var(--col-text-main)",
-                borderRadius: 0,
-                padding: "10px 0",
-                fontFamily: "var(--font-serif)",
-                fontSize: "1.5rem",
-                color: "var(--col-text-main)",
-                outline: "none",
-                appearance: "none",
-                cursor: "pointer",
-              }}
-            >
-              {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                <option key={n} value={n}>
-                  {n} {n === 1 ? "Guest" : "Guests"}
-                </option>
-              ))}
-            </select>
-          </div>
+          {loading && (
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", opacity: 0.5 }}>
+              Loading event details...
+            </p>
+          )}
 
-          <div style={{ marginBottom: "3vh" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "9px",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                marginBottom: "1vh",
-                opacity: 0.6,
-              }}
-            >
-              Select Month
-            </label>
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "300px",
-                padding: "10px 0",
-                fontFamily: "var(--font-serif)",
-                fontSize: "1.5rem",
-                color: "var(--col-text-main)",
-                borderBottom: "1px solid var(--col-text-main)",
-              }}
-            >
-              {monthLabel}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: "4vh" }}>
+          {dinner && (
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(7, 1fr)",
-                gap: "10px",
-                maxWidth: "300px",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "20px",
+                marginTop: "2vh",
+                borderTop: "1px solid var(--col-border)",
+                paddingTop: "20px",
               }}
             >
-              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-                <div
-                  key={i}
+              <div>
+                <h4
                   style={{
+                    fontFamily: "var(--font-sans)",
                     fontSize: "9px",
                     textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    opacity: 0.5,
-                    textAlign: "center",
-                    paddingBottom: "10px",
+                    letterSpacing: "0.15em",
+                    marginBottom: "5px",
                   }}
                 >
-                  {day}
-                </div>
-              ))}
-
-              {days.map((day, i) => {
-                if (day === null) {
-                  return <div key={i} />
-                }
-
-                const isAvailable = availableDays.includes(day)
-                const isSelected = selectedDay === day
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => isAvailable && setSelectedDay(day)}
-                    disabled={!isAvailable}
-                    style={{
-                      aspectRatio: "1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-serif)",
-                      fontSize: "1.1rem",
-                      cursor: isAvailable ? "pointer" : "not-allowed",
-                      borderRadius: "50%",
-                      transition: "all 0.3s ease",
-                      opacity: isAvailable ? 1 : 0.2,
-                      border: "none",
-                      backgroundColor: isSelected ? "var(--col-text-main)" : "transparent",
-                      color: isSelected ? "var(--col-bg-main)" : "var(--col-text-main)",
-                    }}
-                  >
-                    {day}
-                  </button>
-                )
-              })}
+                  Date
+                </h4>
+                <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                  {formatDate(dinner.startsAt, dinner.timezone)}
+                </p>
+              </div>
+              <div>
+                <h4
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.15em",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Price Per Guest
+                </h4>
+                <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                  {formatCurrency(dinner.priceCents, dinner.currency)}
+                </p>
+              </div>
+              <div>
+                <h4
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.15em",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Location
+                </h4>
+                <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                  Private Residence, NJ
+                </p>
+              </div>
+              <div>
+                <h4
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.15em",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Availability
+                </h4>
+                <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                  {dinner.capacity - (dinner._count?.rsvps || 0)} / {dinner.capacity} seats
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
+        {/* Right: Booking form */}
         <div style={{ width: "50%", padding: "4vw var(--space-edge) 4vw 6vw" }}>
           <div
             style={{
@@ -244,7 +267,7 @@ export default function ReserveClient() {
               }}
             >
               <span>EDITION I</span>
-              <span>{new Date(EVENT_YEAR, EVENT_MONTH, EVENT_DAY).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }).toUpperCase()}</span>
+              <span>SATURDAY, AUG 15 2026</span>
             </div>
 
             <h2
@@ -273,99 +296,194 @@ export default function ReserveClient() {
               Private Residence, New Jersey
             </span>
 
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "1.2rem",
-                lineHeight: 1.5,
-                marginBottom: "4vh",
-              }}
-            >
-              The inaugural Be My Guest experience. A sunset-inspired evening featuring a 3-course
-              dinner, curated cocktails, beautiful people, and unforgettable vibes. Space is
-              intentionally limited.
-            </p>
+            <form onSubmit={handleSubmit}>
+              {/* Name */}
+              <div style={{ marginBottom: "2.5vh" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Full name"
+                  style={{
+                    width: "100%",
+                    padding: "10px 0",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid rgba(10,10,10,0.4)",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "1.1rem",
+                    color: "var(--col-text-main)",
+                    outline: "none",
+                  }}
+                />
+              </div>
 
-            <div
-              style={{
-                borderTop: "1px solid rgba(10,10,10,0.2)",
-                paddingTop: "2vh",
-                marginBottom: "4vh",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "9px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  marginBottom: "2vh",
-                }}
-              >
-                The Evening
+              {/* Email */}
+              <div style={{ marginBottom: "2.5vh" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@email.com"
+                  style={{
+                    width: "100%",
+                    padding: "10px 0",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid rgba(10,10,10,0.4)",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "1.1rem",
+                    color: "var(--col-text-main)",
+                    outline: "none",
+                  }}
+                />
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "1rem",
-                  marginBottom: "1vh",
-                  borderBottom: "1px dotted rgba(10,10,10,0.3)",
-                  paddingBottom: "5px",
-                }}
-              >
-                <span>Cocktail Hour</span>
-                <span>5:00 PM</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "1rem",
-                  marginBottom: "1vh",
-                  borderBottom: "1px dotted rgba(10,10,10,0.3)",
-                  paddingBottom: "5px",
-                }}
-              >
-                <span>3-Course Dinner</span>
-                <span>6:15 PM Sharp</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "1rem",
-                  marginBottom: "1vh",
-                  borderBottom: "1px dotted rgba(10,10,10,0.3)",
-                  paddingBottom: "5px",
-                }}
-              >
-                <span>Music & Conversation</span>
-                <span>All Evening</span>
-              </div>
-            </div>
 
-            <div style={{ textAlign: "right" }}>
+              {/* Party Size */}
+              <div style={{ marginBottom: "3vh" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "9px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Number of Guests
+                </label>
+                <select
+                  value={partySize}
+                  onChange={(e) => setPartySize(Number(e.target.value))}
+                  style={{
+                    width: "100%",
+                    padding: "10px 0",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid rgba(10,10,10,0.4)",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "1.1rem",
+                    color: "var(--col-text-main)",
+                    outline: "none",
+                    appearance: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                    <option key={n} value={n} style={{ color: "#0a0a0a" }}>
+                      {n} {n === 1 ? "Guest" : "Guests"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price summary */}
+              <div
+                style={{
+                  borderTop: "1px solid rgba(10,10,10,0.2)",
+                  paddingTop: "2vh",
+                  marginBottom: "3vh",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "1rem",
+                    marginBottom: "1vh",
+                    borderBottom: "1px dotted rgba(10,10,10,0.3)",
+                    paddingBottom: "5px",
+                  }}
+                >
+                  <span>{partySize} {partySize === 1 ? "guest" : "guests"} &times; $75</span>
+                  <span>{formatCurrency(totalPrice)}</span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  <span>Total</span>
+                  <span>{formatCurrency(totalPrice)}</span>
+                </div>
+              </div>
+
+              {error && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "12px",
+                    color: "rgba(10,10,10,0.8)",
+                    marginBottom: "2vh",
+                  }}
+                >
+                  {error}
+                </p>
+              )}
+
               <button
+                type="submit"
+                disabled={submitting || !dinner}
                 style={{
-                  background: "transparent",
+                  width: "100%",
+                  padding: "14px",
+                  background: "var(--col-text-main)",
                   border: "none",
                   fontFamily: "var(--font-sans)",
-                  fontSize: "10px",
+                  fontSize: "11px",
                   textTransform: "uppercase",
                   letterSpacing: "0.2em",
-                  color: "var(--col-text-main)",
-                  position: "relative",
-                  display: "inline-block",
-                  paddingBottom: "4px",
-                  cursor: "pointer",
+                  color: "var(--col-bg-main)",
+                  cursor: submitting ? "wait" : "pointer",
+                  opacity: submitting || !dinner ? 0.5 : 1,
+                  transition: "opacity 0.2s ease",
                 }}
               >
-                Confirm Reservation
+                {submitting ? "Processing..." : `Reserve & Pay ${formatCurrency(totalPrice)}`}
               </button>
-            </div>
+
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "9px",
+                  textAlign: "center",
+                  marginTop: "12px",
+                  opacity: 0.6,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                You&apos;ll be redirected to Stripe to complete payment
+              </p>
+            </form>
           </div>
         </div>
       </div>

@@ -5,13 +5,38 @@ import { findExistingRsvp, getAvailableCapacity, expirePendingRsvps } from "@/li
 import { getStripe } from "@/lib/stripe"
 import { v4 as uuidv4 } from "uuid"
 
+export async function GET(req: NextRequest) {
+  const slug = req.nextUrl.searchParams.get("slug")
+
+  if (!slug) {
+    return NextResponse.json({ error: "Missing slug parameter" }, { status: 400 })
+  }
+
+  const dinner = await db.dinnerParty.findUnique({
+    where: { slug },
+    include: {
+      _count: {
+        select: { rsvps: { where: { status: { in: ["confirmed", "pending_payment"] } } } },
+      },
+    },
+  })
+
+  if (!dinner || dinner.status === "draft") {
+    return NextResponse.json({ error: "Event not found" }, { status: 404 })
+  }
+
+  return NextResponse.json({ dinner })
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { dinnerPartyId, guestName, guestEmail, rsvpStatus } = body
+  const { dinnerPartyId, guestName, guestEmail, rsvpStatus, partySize } = body
 
   if (!dinnerPartyId || !guestName || !guestEmail) {
     return NextResponse.json({ error: "Name, email, and event are required" }, { status: 400 })
   }
+
+  const seats = Math.max(1, Math.min(7, Number(partySize) || 1))
 
   const email = normalizeEmail(guestEmail)
 
@@ -45,15 +70,15 @@ export async function POST(req: NextRequest) {
 
     if (existing.status === "declined") {
       const available = await getAvailableCapacity(dinnerPartyId)
-      if (available <= 0) return NextResponse.json({ error: "Event is sold out" }, { status: 400 })
+      if (available < seats) return NextResponse.json({ error: `Only ${available} seats remaining` }, { status: 400 })
 
       if (dinner.paymentRequired && dinner.priceCents > 0) {
-        return await createPaidRsvp(dinner, existing.id, guestName, email)
+        return await createPaidRsvp(dinner, existing.id, guestName, email, seats)
       }
 
       const updated = await db.rsvp.update({
         where: { id: existing.id },
-        data: { status: "confirmed", guestName, priceCentsSnapshot: dinner.priceCents, currencySnapshot: dinner.currency },
+        data: { status: "confirmed", guestName, priceCentsSnapshot: dinner.priceCents * seats, currencySnapshot: dinner.currency },
       })
       return NextResponse.json({ rsvp: updated })
     }
@@ -88,10 +113,10 @@ export async function POST(req: NextRequest) {
   }
 
   const available = await getAvailableCapacity(dinnerPartyId)
-  if (available <= 0) return NextResponse.json({ error: "Event is sold out" }, { status: 400 })
+  if (available < seats) return NextResponse.json({ error: `Only ${available} seats remaining` }, { status: 400 })
 
   if (dinner.paymentRequired && dinner.priceCents > 0) {
-    return await createPaidRsvp(dinner, existing?.id, guestName, email)
+    return await createPaidRsvp(dinner, existing?.id, guestName, email, seats)
   }
 
   const rsvp = await db.rsvp.create({
@@ -100,7 +125,7 @@ export async function POST(req: NextRequest) {
       guestName: guestName.trim(),
       guestEmail: email,
       status: "confirmed",
-      priceCentsSnapshot: dinner.priceCents,
+      priceCentsSnapshot: dinner.priceCents * seats,
       currencySnapshot: dinner.currency,
     },
   })
@@ -112,8 +137,10 @@ async function createPaidRsvp(
   dinner: { id: string; slug: string; title: string; priceCents: number; currency: string; restaurant: { name: string } },
   existingRsvpId: string | undefined,
   guestName: string,
-  email: string
+  email: string,
+  partySize: number = 1
 ) {
+  const totalCents = dinner.priceCents * partySize
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000)
 
   let rsvp
@@ -123,7 +150,7 @@ async function createPaidRsvp(
       data: {
         status: "pending_payment",
         guestName: guestName.trim(),
-        priceCentsSnapshot: dinner.priceCents,
+        priceCentsSnapshot: totalCents,
         currencySnapshot: dinner.currency,
         expiresAt,
       },
@@ -135,7 +162,7 @@ async function createPaidRsvp(
         guestName: guestName.trim(),
         guestEmail: email,
         status: "pending_payment",
-        priceCentsSnapshot: dinner.priceCents,
+        priceCentsSnapshot: totalCents,
         currencySnapshot: dinner.currency,
         expiresAt,
       },
@@ -153,12 +180,12 @@ async function createPaidRsvp(
           price_data: {
             currency: dinner.currency,
             product_data: {
-              name: `${dinner.title} — ${dinner.restaurant.name}`,
-              description: "Dinner party seat",
+              name: `${dinner.title}`,
+              description: partySize > 1 ? `${partySize} guests` : "1 guest",
             },
             unit_amount: dinner.priceCents,
           },
-          quantity: 1,
+          quantity: partySize,
         },
       ],
       customer_email: email,
@@ -167,11 +194,13 @@ async function createPaidRsvp(
       metadata: {
         rsvpId: rsvp.id,
         dinnerPartyId: dinner.id,
+        partySize: String(partySize),
       },
       payment_intent_data: {
         metadata: {
           rsvpId: rsvp.id,
           dinnerPartyId: dinner.id,
+          partySize: String(partySize),
         },
       },
     },
@@ -182,7 +211,7 @@ async function createPaidRsvp(
     data: {
       rsvpId: rsvp.id,
       stripeCheckoutSessionId: session.id,
-      amountCents: dinner.priceCents,
+      amountCents: totalCents,
       currency: dinner.currency,
       status: "checkout_open",
     },
