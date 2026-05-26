@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AdminAuditLog[]
+}
+
+model Restaurant {
+  id               String   @id @default(cuid())
+  name             String
+  websiteUrl       String?
+  googleMapsUrl    String?
+  addressLine      String?
+  phone            String?
+  notes            String?
+  imageUrl         String?
+  imageSource      String?
+  googlePlaceId    String?
+  providerMetadata String?
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  dinnerParties DinnerParty[]
+}
+
+model DinnerParty {
+  id              String   @id @default(cuid())
+  restaurantId    String
+  title           String
+  slug            String   @unique
+  description     String?
+  startsAt        DateTime
+  timezone        String   @default("America/New_York")
+  capacity        Int
+  rsvpDeadline    DateTime?
+  priceCents      Int      @default(0)
+  currency        String   @default("usd")
+  priceDescription String?
+  paymentRequired Boolean  @default(false)
+  allowMaybe      Boolean  @default(false)
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  rsvps      Rsvp[]
+}
+
+model Rsvp {
+  id                String    @id @default(cuid())
+  dinnerPartyId     String
+  guestName         String
+  guestEmail        String
+  status            String    @default("pending_payment")
+  priceCentsSnapshot Int?
+  currencySnapshot  String?
+  guestTokenHash    String?
+  expiresAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  dinnerParty DinnerParty @relation(fields: [dinnerPartyId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+
+  @@unique([dinnerPartyId, guestEmail])
+}
+
+model Payment {
+  id                      String    @id @default(cuid())
+  rsvpId                  String
+  stripeCheckoutSessionId String?  @unique
+  stripePaymentIntentId   String?
+  amountCents             Int
+  currency                String    @default("usd")
+  status                  String    @default("created")
+  rawProviderStatus       String?
+  paidAt                  DateTime?
+  refundedAt              DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  rsvp Rsvp @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
+}
+
+model ProviderEvent {
+  id               String    @id @default(cuid())
+  provider         String
+  providerEventId  String
+  eventType        String
+  relatedRecordType String?
+  relatedRecordId  String?
+  payloadHash      String?
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@unique([provider, providerEventId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminUserId String
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+}
