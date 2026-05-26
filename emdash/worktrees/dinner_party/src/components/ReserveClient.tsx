@@ -420,7 +420,7 @@ export default function ReserveClient() {
                     paddingBottom: "5px",
                   }}
                 >
-                  <span>{partySize} {partySize === 1 ? "guest" : "guests"} &times; $75</span>
+                  <span>{partySize} {partySize === 1 ? "guest" : "guests"} &times; {formatCurrency(dinner ? dinner.priceCents : 0)}</span>
                   <span>{formatCurrency(totalPrice)}</span>
                 </div>
                 <div

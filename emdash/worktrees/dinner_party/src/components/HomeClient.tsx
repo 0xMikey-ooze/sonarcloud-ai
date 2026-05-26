@@ -219,7 +219,7 @@ export default function HomeClient() {
                     paddingBottom: "4px",
                   }}
                 >
-                  Reserve Now — $75/guest
+                  Reserve Now — $225/guest
                 </span>
               </div>
             </div>

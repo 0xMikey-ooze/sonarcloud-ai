@@ -43,7 +43,7 @@ async function main() {
       timezone: "America/New_York",
       capacity: 20,
       rsvpDeadline,
-      priceCents: 7500,
+      priceCents: 22500,
       currency: "usd",
       priceDescription: "per guest — includes 3-course dinner and cocktails",
       paymentRequired: true,
