@@ -6,50 +6,38 @@ import { NocturneHeader } from "@/components/NocturneHeader"
 
 const experiences = [
   {
-    chapter: "CHAP. VII",
-    date: "NOV 2024",
-    title: ["The Fall", "Harvest"],
-    chef: "By Chef Elias Vane",
+    chapter: "EDITION I",
+    date: "AUG 2026",
+    title: ["Summer", "Sunset"],
+    chef: "Private Residence, New Jersey",
     description:
-      "An exploration of root and ember. Chef Vane returns to his origins, presenting a menu that honors the stark beauty of late autumn. Expect smoke-kissed preserves, game from the northern woods, and forgotten tubers brought to the fore.",
-    status: "Booking Open",
-    action: "Reserve a Seat",
+      "The inaugural Be My Guest experience. A sunset-inspired evening featuring a 3-course dinner, curated cocktails, and an atmosphere designed to feel like stepping into a luxury dinner party. Cocktail hour begins at 5pm. Dinner served at 6:15pm sharp.",
+    status: "Seats Available",
+    action: "Reserve Your Seat",
     actionHref: "/reserve",
     featured: true,
   },
   {
-    chapter: "CHAP. VIII",
-    date: "JAN 2025",
-    title: ["Winter's", "Respite"],
-    chef: "By Chef Amara Lin",
+    chapter: "EDITION II",
+    date: "FALL 2026",
+    title: ["Harvest", "Moon"],
+    chef: "Details Coming Soon",
     description:
-      "Finding warmth in the depths of winter. A meditation on preservation and slow cooking. Broths that take days, ferments that take months, and the surprising vibrancy of cold-water catches.",
-    status: "Preview",
-    action: "Notify Me",
+      "An autumn evening built around warmth, candlelight, and the flavors of the season. Think rich braises, spiced cocktails, and a dress code that matches the golden hour. Details dropping soon.",
+    status: "Coming Soon",
+    action: "Get Notified",
     actionHref: "#",
     featured: false,
   },
   {
-    chapter: "CHAP. IX",
-    date: "MAR 2025",
-    title: ["The First", "Thaw"],
-    chef: "Guest Chef Julian Rossi",
+    chapter: "EDITION III",
+    date: "WINTER 2026",
+    title: ["Midnight", "Supper"],
+    chef: "Details Coming Soon",
     description:
-      "Capturing the ephemeral nature of early spring. A highly restricted menu focusing entirely on shoots, buds, and the immediate bounty that follows the melting snows of the high valleys.",
+      "A dark, moody winter gathering. Candlelit tables, velvety cocktails, and a menu that leans into indulgence. This one&apos;s for the people who show up for the experience, not just the food.",
     status: "Announced",
-    action: "Read Journal",
-    actionHref: "#",
-    featured: false,
-  },
-  {
-    chapter: "CHAP. X",
-    date: "MAY 2025",
-    title: ["Coastal", "Foraging"],
-    chef: "To Be Announced",
-    description:
-      "Turning our attention to the tidal zones. A celebration of brine, kelp forests, and the obscure bivalves found only in our local coves. Menu details to be revealed.",
-    status: "Concept Phase",
-    action: "Notify Me",
+    action: "Get Notified",
     actionHref: "#",
     featured: false,
   },
@@ -116,8 +104,8 @@ export default function ExperiencesPage() {
               maxWidth: "400px",
             }}
           >
-            A preview of seasons to come. Discover our forthcoming chapters, guest chefs, and the
-            culinary explorations defining the months ahead.
+            Every edition is a different theme, a different menu, a different vibe. Limited seats.
+            Intentional curation. Evenings worth remembering.
           </p>
         </div>
 

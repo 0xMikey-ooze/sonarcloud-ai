@@ -8,8 +8,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Nocturne | Supper Club",
-  description: "An intimate venue for culinary exploration",
+  title: "Be My Guest | Curated Dinner Experiences",
+  description: "Intimate, elevated dinner experiences bringing amazing people together over incredible food, cocktails, music, and conversation. New Jersey.",
 }
 
 export default function RootLayout({

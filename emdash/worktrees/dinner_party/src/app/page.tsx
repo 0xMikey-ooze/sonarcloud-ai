@@ -53,7 +53,7 @@ export default function HomePage() {
                 userSelect: "none",
               }}
             >
-              in the dark
+              be my guest
             </div>
 
             <h1
@@ -68,10 +68,10 @@ export default function HomePage() {
                 zIndex: 2,
               }}
             >
-              Dining is not merely <br />
-              consumption. It is, <br />
-              profoundly, a <em style={{ fontStyle: "italic", fontWeight: 400 }}>communion</em> <br />
-              with the unseen.
+              The best evenings <br />
+              are the ones you <br />
+              didn&apos;t <em style={{ fontStyle: "italic", fontWeight: 400 }}>plan</em>. <br />
+              Until now.
             </h1>
           </div>
 
@@ -98,7 +98,7 @@ export default function HomePage() {
                 opacity: 0.6,
               }}
             >
-              AN EPHEMERAL CULINARY EXPERIENCE · NO SUBSTITUTIONS · NO PHONES
+              CURATED DINNER EXPERIENCES · INTIMATE BY DESIGN · NEW JERSEY
             </span>
           </div>
         </div>
@@ -114,7 +114,7 @@ export default function HomePage() {
         >
           <img
             src="https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=2000&auto=format&fit=crop"
-            alt="Chef preparing food in a dark kitchen"
+            alt="Cocktails and dinner ambiance"
             style={{
               position: "absolute",
               top: 0,
@@ -128,7 +128,7 @@ export default function HomePage() {
           />
 
           <Link
-            href="/reserve"
+            href="/experiences"
             style={{
               position: "absolute",
               top: "50%",
@@ -167,8 +167,8 @@ export default function HomePage() {
                 color: "var(--col-text-main)",
               }}
             >
-              <span>CHAP. VII</span>
-              <span>24 NOV 2024</span>
+              <span>EDITION I</span>
+              <span>15 AUG 2026</span>
             </div>
 
             <div
@@ -183,10 +183,10 @@ export default function HomePage() {
                 marginBottom: "4vh",
               }}
             >
-              <span>&quot;HEARTH &amp; SHADOW&quot;</span>
+              <span>&quot;SUMMER SUNSET&quot;</span>
               <br />
               <span style={{ opacity: 0.5, marginTop: "4px", display: "inline-block" }}>
-                BY CHEF ELIAS VANE
+                COCKTAILS AT 5PM · DINNER AT 6:15PM
               </span>
             </div>
 
@@ -202,9 +202,9 @@ export default function HomePage() {
                   marginBottom: "2vh",
                 }}
               >
-                The Fall
+                Summer
                 <br />
-                Harvest
+                Sunset
               </h2>
               <div style={{ textAlign: "center" }}>
                 <span
@@ -219,7 +219,7 @@ export default function HomePage() {
                     paddingBottom: "4px",
                   }}
                 >
-                  Secure a Seat
+                  See Details
                 </span>
               </div>
             </div>

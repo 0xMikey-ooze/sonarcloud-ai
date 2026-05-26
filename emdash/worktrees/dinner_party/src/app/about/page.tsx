@@ -49,7 +49,7 @@ export default function AboutPage() {
                 marginBottom: "40px",
               }}
             >
-              An intimate venue for culinary exploration.
+              Not a restaurant. Not a party. Something in between.
             </h1>
 
             <p
@@ -61,9 +61,10 @@ export default function AboutPage() {
                 color: "rgba(10, 10, 10, 0.8)",
               }}
             >
-              Nocturne was conceived as a reaction against the modern dining experience. We believe
-              that true connection happens when distractions are removed and focus is returned to the
-              essential elements: food, atmosphere, and the people beside you.
+              Be My Guest is a curated dinner experience designed to bring amazing people together
+              over incredible food, cocktails, music, conversation, and vibes. The kind of night
+              that feels like walking into someone&apos;s best dinner party — except every detail has
+              been intentional.
             </p>
 
             <p
@@ -75,9 +76,9 @@ export default function AboutPage() {
                 color: "rgba(10, 10, 10, 0.8)",
               }}
             >
-              Our space is intentionally small, seating only twelve guests per evening. This allows
-              us to curate an environment where every detail is considered, and where the line
-              between guest and participant begins to blur.
+              Each edition features a different theme and culinary experience. We handle the menu,
+              the cocktails, the ambiance, the music, even the dress code. You show up, settle in,
+              and let the evening unfold.
             </p>
 
             <h2
@@ -90,7 +91,7 @@ export default function AboutPage() {
                 marginTop: "50px",
               }}
             >
-              The Philosophy
+              Why This Exists
             </h2>
 
             <p
@@ -102,10 +103,10 @@ export default function AboutPage() {
                 color: "rgba(10, 10, 10, 0.8)",
               }}
             >
-              We source obsessively, looking for ingredients that tell a story of their environment.
-              The menu is a living document, changing not just with the seasons, but with the
-              micro-seasons of our local purveyors. There are no substitutions, as each menu is
-              designed as a complete, cohesive narrative.
+              The best nights out aren&apos;t at clubs or crowded restaurants. They&apos;the
+              evenings where the food is memorable, the conversation flows, the music is right,
+              and you look around and think — this is it. That&apos;s the energy we&apos;re building.
+              Intimate, elevated, and always worth showing up for.
             </p>
 
             <div
@@ -131,7 +132,7 @@ export default function AboutPage() {
                   Location
                 </h4>
                 <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
-                  Disclosed upon booking
+                  Private Residence, NJ
                 </p>
               </div>
               <div>
@@ -147,7 +148,7 @@ export default function AboutPage() {
                   Seating
                 </h4>
                 <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
-                  12 Guests Maximum
+                  Very Limited
                 </p>
               </div>
               <div>
@@ -160,10 +161,10 @@ export default function AboutPage() {
                     marginBottom: "5px",
                   }}
                 >
-                  Schedule
+                  Experience
                 </h4>
                 <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
-                  Thursday — Saturday
+                  3-Course Dinner + Cocktails
                 </p>
               </div>
               <div>
@@ -176,10 +177,10 @@ export default function AboutPage() {
                     marginBottom: "5px",
                   }}
                 >
-                  Policy
+                  Vibes
                 </h4>
                 <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
-                  No Phones Permitted
+                  Music, Energy, Connection
                 </p>
               </div>
             </div>
@@ -201,7 +202,7 @@ export default function AboutPage() {
                   opacity: 0.6,
                 }}
               >
-                ESTABLISHED 2023 · AN EPHEMERAL CULINARY EXPERIENCE
+                EDITION I · CURATED DINNER EXPERIENCES · SUMMER 2026
               </span>
             </div>
           </div>
@@ -219,7 +220,7 @@ export default function AboutPage() {
         >
           <img
             src="https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2000&auto=format&fit=crop"
-            alt="Intimate dimly lit dining room with a long table"
+            alt="Intimate dinner gathering with candlelight"
             style={{
               position: "absolute",
               top: 0,
@@ -243,7 +244,7 @@ export default function AboutPage() {
               zIndex: 10,
             }}
           >
-            The Dining Room
+            The Table
           </div>
         </div>
       </div>

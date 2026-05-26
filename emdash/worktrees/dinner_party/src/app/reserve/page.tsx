@@ -5,10 +5,11 @@ import { NoiseCanvas } from "@/components/NoiseCanvas"
 import { NocturneHeader } from "@/components/NocturneHeader"
 
 export default function ReservePage() {
-  const [selectedDay, setSelectedDay] = useState(24)
+  const [selectedDay, setSelectedDay] = useState(15)
 
-  const daysInMonth = 30
-  const firstDayOfWeek = 3
+  // August 2026 starts on Saturday (index 6)
+  const daysInMonth = 31
+  const firstDayOfWeek = 6
 
   const days = []
   for (let i = 0; i < firstDayOfWeek; i++) {
@@ -18,7 +19,7 @@ export default function ReservePage() {
     days.push(i)
   }
 
-  const availableDays = [17, 24]
+  const availableDays = [15]
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", backgroundColor: "var(--col-bg-main)" }}>
@@ -66,7 +67,7 @@ export default function ReservePage() {
             }}
           >
             Reserve
-            <br />a Seat
+            <br />Your Seat
           </h1>
 
           <p
@@ -78,8 +79,8 @@ export default function ReservePage() {
               marginBottom: "6vh",
             }}
           >
-            Select your desired date and party size. Due to the intimate nature of our gatherings,
-            space is highly limited. No substitutions can be accommodated.
+            Space is intentionally limited to keep the experience intimate and curated. Once seats
+            are gone, they&apos;re gone. Secure your spot for the inaugural edition.
           </p>
 
           <div style={{ marginBottom: "3vh" }}>
@@ -112,9 +113,10 @@ export default function ReservePage() {
                 cursor: "pointer",
               }}
             >
+              <option>1 Guest</option>
               <option>2 Guests</option>
+              <option>3 Guests</option>
               <option>4 Guests</option>
-              <option>6 Guests (Private Table)</option>
             </select>
           </div>
 
@@ -148,8 +150,7 @@ export default function ReservePage() {
                 cursor: "pointer",
               }}
             >
-              <option>November 2024</option>
-              <option>December 2024</option>
+              <option>August 2026</option>
             </select>
           </div>
 
@@ -234,8 +235,8 @@ export default function ReservePage() {
                 marginBottom: "4vh",
               }}
             >
-              <span>CHAP. VII</span>
-              <span>24 NOV 2024</span>
+              <span>EDITION I</span>
+              <span>15 AUG 2026</span>
             </div>
 
             <h2
@@ -247,9 +248,9 @@ export default function ReservePage() {
                 marginBottom: "2vh",
               }}
             >
-              The Fall
+              Summer
               <br />
-              Harvest
+              Sunset
             </h2>
 
             <span
@@ -261,7 +262,7 @@ export default function ReservePage() {
                 display: "block",
               }}
             >
-              By Chef Elias Vane
+              Private Residence, New Jersey
             </span>
 
             <p
@@ -272,9 +273,9 @@ export default function ReservePage() {
                 marginBottom: "4vh",
               }}
             >
-              An exploration of root and ember. Chef Vane returns to his origins, presenting a menu
-              that honors the stark beauty of late autumn. Expect smoke-kissed preserves, game from
-              the northern woods, and forgotten tubers brought to the fore.
+              The inaugural Be My Guest experience. A sunset-inspired evening featuring a 3-course
+              dinner, curated cocktails, beautiful people, and unforgettable vibes. Space is
+              intentionally limited.
             </p>
 
             <div
@@ -292,7 +293,7 @@ export default function ReservePage() {
                   marginBottom: "2vh",
                 }}
               >
-                Tasting Preview
+                The Evening
               </div>
               <div
                 style={{
@@ -305,8 +306,8 @@ export default function ReservePage() {
                   paddingBottom: "5px",
                 }}
               >
-                <span>Charred Salsify</span>
-                <span>Marrow &amp; Pine</span>
+                <span>Cocktail Hour</span>
+                <span>5:00 PM</span>
               </div>
               <div
                 style={{
@@ -319,8 +320,8 @@ export default function ReservePage() {
                   paddingBottom: "5px",
                 }}
               >
-                <span>Venison Loin</span>
-                <span>Blackberry &amp; Ash</span>
+                <span>3-Course Dinner</span>
+                <span>6:15 PM Sharp</span>
               </div>
               <div
                 style={{
@@ -333,8 +334,8 @@ export default function ReservePage() {
                   paddingBottom: "5px",
                 }}
               >
-                <span>Smoked Chestnut</span>
-                <span>Brown Butter</span>
+                <span>Music & Conversation</span>
+                <span>All Evening</span>
               </div>
             </div>
 

@@ -36,7 +36,7 @@ export function NocturneHeader({ variant = "light" }: NocturneHeaderProps) {
           mixBlendMode: isDark ? "difference" : "normal",
         }}
       >
-        n.
+        bmg.
       </Link>
       <nav style={{ display: "flex", gap: "2vw", pointerEvents: "auto" }}>
         <NavLink href="/about" isDark={isDark}>About</NavLink>
